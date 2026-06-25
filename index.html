@@ -26,30 +26,25 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
 
-  /* Header */
   .app-header { background: var(--primary); color: white; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 52px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
   .app-header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
   .header-right { display: flex; align-items: center; gap: 12px; }
   .sync-status { font-size: 12px; opacity: 0.85; }
-  .sync-status.ok { color: #86efac; }
+  .sync-status.ok { color: #d1fae5; }
   .sync-status.err { color: #fca5a5; }
 
-  /* Nav Tabs */
-  .nav-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+  .nav-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; }
   .nav-tab { padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
-  .nav-tab:hover { color: var(--primary); }
-  .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .nav-tab:hover { color: var(--primary-dark); }
+  .nav-tab.active { color: var(--primary-dark); border-bottom-color: var(--primary); }
 
-  /* Main content */
-  .main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  .main { padding: 24px; max-width: 1300px; margin: 0 auto; }
 
-  /* Cards */
   .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
-  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
   .card-header h2 { font-size: 14px; font-weight: 600; }
   .card-body { padding: 20px; }
 
-  /* Buttons */
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
   .btn-primary { background: var(--primary); color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.10); }
   .btn-primary:hover { background: var(--primary-dark); }
@@ -60,70 +55,74 @@
   .btn-sm { padding: 4px 10px; font-size: 12px; }
   .btn-icon { padding: 6px 8px; }
 
-  /* Table */
   .tbl-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; }
-  th { background: var(--bg); text-align: left; padding: 9px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
-  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { background: var(--bg); text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--primary-light); }
 
-  /* Badge */
   .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
   .badge-active { background: var(--green-light); color: var(--green); }
   .badge-disc { background: var(--bg); color: var(--text-muted); }
-  .badge-dev { background: var(--yellow-light); color: var(--yellow); }
 
-  /* Form */
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
   .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .form-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
   .form-group input, .form-group select, .form-group textarea { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text); background: var(--white); transition: border 0.15s; }
   .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
   .form-group.full { grid-column: 1 / -1; }
+  .form-group.span2 { grid-column: span 2; }
 
-  /* Modal */
+  .price-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .price-pair .sub-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
   .modal-bg.open { display: flex; }
-  .modal { background: var(--white); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+  .modal { background: var(--white); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
   .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .modal-header h3 { font-size: 15px; font-weight: 600; }
   .modal-body { padding: 20px; }
   .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
   .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; }
 
-  /* Settings panel */
+  .section-divider { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin: 4px 0 10px; grid-column: 1 / -1; }
+
   .settings-section { margin-bottom: 24px; }
   .settings-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   .input-row { display: flex; gap: 8px; }
   .input-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 
-  /* Alert */
   .alert { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
-  .alert-info { background: var(--primary-light); color: var(--primary); border: 1px solid #bfdbfe; }
-  .alert-success { background: var(--green-light); color: var(--green); border: 1px solid #bbf7d0; }
-  .alert-error { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+  .alert-info { background: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--border); }
 
-  /* Placeholder tabs */
   .placeholder-tab { text-align: center; padding: 80px 20px; color: var(--text-muted); }
   .placeholder-tab .icon { font-size: 48px; margin-bottom: 16px; }
   .placeholder-tab h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
   .placeholder-tab p { font-size: 13px; line-height: 1.6; }
 
-  /* Empty state */
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
-
-  /* Tag */
   .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
-
-  .gap-8 { display: flex; gap: 8px; }
-  .mb-16 { margin-bottom: 16px; }
+  .gap-8 { display: flex; gap: 8px; align-items: center; }
+  .mb-12 { margin-bottom: 12px; }
   .hidden { display: none; }
+
+  /* Exchange rate bar */
+  .fx-bar { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .fx-bar label { font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+  .fx-bar input { width: 120px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+  .fx-bar .fx-note { font-size: 11px; color: var(--text-muted); }
+
+  .vnd { font-size: 11px; color: var(--text-muted); }
+  .usd-eq { font-size: 11px; color: var(--primary-dark); }
+
+  td .price-block { line-height: 1.8; }
+  td .price-row { display: flex; justify-content: space-between; gap: 8px; }
+  td .price-row .tier { font-size: 11px; color: var(--text-muted); }
 </style>
 </head>
 <body>
 
-<!-- App Header -->
 <div class="app-header">
   <h1>📦 ELECOM ASIA Order Tracker</h1>
   <div class="header-right">
@@ -132,7 +131,6 @@
   </div>
 </div>
 
-<!-- Nav Tabs -->
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="switchTab('active')">📋 Active Orders</div>
   <div class="nav-tab" onclick="switchTab('shipped')">🚢 Shipped & Payment</div>
@@ -140,10 +138,8 @@
   <div class="nav-tab" onclick="switchTab('dev')">🔧 In Development</div>
 </div>
 
-<!-- Main -->
 <div class="main">
 
-  <!-- TAB: Active Orders (placeholder) -->
   <div id="tab-active">
     <div class="placeholder-tab">
       <div class="icon">📋</div>
@@ -152,7 +148,6 @@
     </div>
   </div>
 
-  <!-- TAB: Shipped & Payment (placeholder) -->
   <div id="tab-shipped" class="hidden">
     <div class="placeholder-tab">
       <div class="icon">🚢</div>
@@ -161,24 +156,30 @@
     </div>
   </div>
 
-  <!-- TAB: Product Master -->
   <div id="tab-products" class="hidden">
     <div class="card">
       <div class="card-header">
         <h2>📦 Product Master — ELECOM ASIA</h2>
-        <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add Product</button>
+        <div class="gap-8">
+          <div class="fx-bar">
+            <label>1 USD =</label>
+            <input type="number" id="fxRate" placeholder="25000" onchange="onFxChange()">
+            <span class="fx-note">VND &nbsp;(used to show cost in USD)</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add Product</button>
+        </div>
       </div>
       <div class="card-body" style="padding:0">
         <div class="tbl-wrap">
           <table id="productTable">
             <thead>
               <tr>
-                <th>客人料號<br><span style="font-weight:400">Customer P/N</span></th>
-                <th>廠內料號<br><span style="font-weight:400">Internal P/N</span></th>
-                <th>Product SKU<br><span style="font-weight:400">Bare product</span></th>
+                <th>客人料號<br>Customer P/N</th>
+                <th>廠內料號<br>Internal P/N</th>
+                <th>Product SKU<br>(bare)</th>
                 <th>Description</th>
-                <th>Unit Price<br><span style="font-weight:400">USD</span></th>
-                <th>Production Cost<br><span style="font-weight:400">USD</span></th>
+                <th>Unit Price (USD)<br><span style="font-weight:400">500 pcs / 1000 pcs</span></th>
+                <th>Production Cost<br><span style="font-weight:400">VND (≈ USD)</span></th>
                 <th>Status</th>
                 <th>Note</th>
                 <th></th>
@@ -191,7 +192,6 @@
     </div>
   </div>
 
-  <!-- TAB: In Development (placeholder) -->
   <div id="tab-dev" class="hidden">
     <div class="placeholder-tab">
       <div class="icon">🔧</div>
@@ -211,6 +211,7 @@
     </div>
     <div class="modal-body">
       <div class="form-grid">
+        <div class="section-divider">Identification</div>
         <div class="form-group">
           <label>客人料號 Customer P/N *</label>
           <input id="f_custPN" placeholder="e.g. P-DSMMWBK">
@@ -221,20 +222,34 @@
         </div>
         <div class="form-group">
           <label>Product SKU (bare)</label>
-          <input id="f_productSKU" placeholder="e.g. DSMMWBK">
+          <input id="f_productSKU" placeholder="e.g. 6MT1300152">
         </div>
         <div class="form-group">
           <label>Description</label>
           <input id="f_desc" placeholder="e.g. Desktop Stand Mini">
         </div>
+
+        <div class="section-divider">Pricing (USD)</div>
         <div class="form-group">
-          <label>Unit Price (USD)</label>
-          <input id="f_unitPrice" type="number" step="0.0001" placeholder="0.0000">
+          <label>Unit Price — 500 pcs</label>
+          <input id="f_price500" type="number" step="0.0001" placeholder="0.0000">
         </div>
         <div class="form-group">
-          <label>Production Cost (USD)</label>
-          <input id="f_prodCost" type="number" step="0.0001" placeholder="0.0000">
+          <label>Unit Price — 1000 pcs</label>
+          <input id="f_price1000" type="number" step="0.0001" placeholder="0.0000">
         </div>
+
+        <div class="section-divider">Production Cost</div>
+        <div class="form-group">
+          <label>Production Cost (VND)</label>
+          <input id="f_prodCost" type="number" step="1" placeholder="e.g. 85000">
+        </div>
+        <div class="form-group" style="justify-content:flex-end; padding-bottom:2px">
+          <label>≈ USD (at current rate)</label>
+          <input id="f_prodCostUSD" readonly placeholder="—" style="background:var(--bg); color:var(--text-muted);">
+        </div>
+
+        <div class="section-divider">Other</div>
         <div class="form-group">
           <label>Status</label>
           <select id="f_status">
@@ -255,7 +270,7 @@
   </div>
 </div>
 
-<!-- MODAL: Settings / GitHub -->
+<!-- MODAL: Settings -->
 <div class="modal-bg" id="settingsModal">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
@@ -263,21 +278,20 @@
       <button class="close-btn" onclick="closeSettings()">×</button>
     </div>
     <div class="modal-body">
-
       <div class="settings-section">
         <h3>🔗 GitHub Integration</h3>
         <div class="alert alert-info" style="margin-bottom:14px">
           Data is saved to a <code>data.json</code> file in your GitHub repo. Your token is stored only in this browser.
         </div>
-        <div class="form-group mb-16">
+        <div class="form-group mb-12">
           <label>GitHub Username</label>
           <input id="cfg_user" placeholder="your-github-username">
         </div>
-        <div class="form-group mb-16">
+        <div class="form-group mb-12">
           <label>Repository Name</label>
           <input id="cfg_repo" placeholder="elecom-tracker">
         </div>
-        <div class="form-group mb-16">
+        <div class="form-group mb-12">
           <label>Personal Access Token (repo scope)</label>
           <input id="cfg_token" type="password" placeholder="ghp_xxxxxxxxxxxx">
         </div>
@@ -287,7 +301,6 @@
         </div>
         <div id="ghMsg" style="margin-top:10px; font-size:13px;"></div>
       </div>
-
       <div class="settings-section">
         <h3>💾 Manual Backup</h3>
         <div class="gap-8">
@@ -296,7 +309,6 @@
           <input type="file" id="importFile" accept=".json" class="hidden" onchange="importJSON(event)">
         </div>
       </div>
-
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeSettings()">Close</button>
@@ -305,14 +317,14 @@
 </div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
 let state = {
+  fxRate: '',
   products: [
-    { id: uid(), custPN: 'P-DSMMWBK',  internalPN: '8ELB130001', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'P-DSMMWWH',  internalPN: '8ELB130002', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'P-DSMMWPN',  internalPN: '8ELB130003', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'PWCARS18BK', internalPN: '8ELC130001', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'P-CARS18BK', internalPN: '8ELB040001', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-DSMMWBK',  internalPN: '8ELB130001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-DSMMWWH',  internalPN: '8ELB130002', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-DSMMWPN',  internalPN: '8ELB130003', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'PWCARS18BK', internalPN: '8ELC130001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-CARS18BK', internalPN: '8ELB040001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
   ],
   activeOrders: [],
   shippedOrders: []
@@ -321,50 +333,87 @@ let state = {
 let github = { user: '', repo: '', token: '' };
 let editingProductId = null;
 
-// ─── UTILS ───────────────────────────────────────────────────────────────────
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
-function fmt(val, prefix='') {
-  if (val === '' || val === null || val === undefined) return '—';
-  return prefix + Number(val).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+function fmtUSD(val) {
+  if (val === '' || val == null) return '—';
+  return '$' + Number(val).toFixed(4);
 }
 
-// ─── TABS ────────────────────────────────────────────────────────────────────
+function fmtVND(val) {
+  if (val === '' || val == null) return '—';
+  return Number(val).toLocaleString() + ' ₫';
+}
+
+function vndToUSD(vnd) {
+  const rate = parseFloat(state.fxRate);
+  if (!rate || !vnd) return null;
+  return (parseFloat(vnd) / rate).toFixed(4);
+}
+
+// ─── FX RATE ──────────────────────────────────────────────────────────────────
+function onFxChange() {
+  state.fxRate = document.getElementById('fxRate').value;
+  renderProducts();
+  saveToGithub();
+}
+
+// Update modal USD preview as user types VND cost
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('f_prodCost').addEventListener('input', updateModalUSDPreview);
+});
+
+function updateModalUSDPreview() {
+  const vnd = document.getElementById('f_prodCost').value;
+  const usd = vndToUSD(vnd);
+  document.getElementById('f_prodCostUSD').value = usd ? '$' + usd : '—';
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
 function switchTab(name) {
-  document.querySelectorAll('.nav-tab').forEach((t,i) => {
-    const names = ['active','shipped','products','dev'];
-    t.classList.toggle('active', names[i] === name);
-  });
-  ['active','shipped','products','dev'].forEach(n => {
-    document.getElementById('tab-'+n).classList.toggle('hidden', n !== name);
-  });
+  const names = ['active','shipped','products','dev'];
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
+  names.forEach(n => document.getElementById('tab-'+n).classList.toggle('hidden', n !== name));
 }
 
 // ─── PRODUCT MASTER ───────────────────────────────────────────────────────────
 function renderProducts() {
+  // sync FX rate input
+  document.getElementById('fxRate').value = state.fxRate || '';
+
   const tbody = document.getElementById('productBody');
   if (!state.products.length) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No products yet. Click "+ Add Product" to begin.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No products yet.</td></tr>`;
     return;
   }
-  tbody.innerHTML = state.products.map(p => `
+  tbody.innerHTML = state.products.map(p => {
+    const usdEq = vndToUSD(p.prodCost);
+    return `
     <tr>
       <td><span class="mono">${p.custPN}</span></td>
       <td><span class="mono">${p.internalPN}</span></td>
       <td><span class="mono">${p.productSKU || '—'}</span></td>
-      <td>${p.desc || '—'}</td>
-      <td>${fmt(p.unitPrice, '$')}</td>
-      <td>${fmt(p.prodCost, '$')}</td>
-      <td><span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-disc'}">${p.status}</span></td>
-      <td style="max-width:160px; white-space:normal; font-size:12px; color:var(--text-muted)">${p.note || '—'}</td>
+      <td style="color:var(--text-muted)">${p.desc || '—'}</td>
       <td>
-        <div class="gap-8">
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="editProduct('${p.id}')" title="Edit">✏️</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteProduct('${p.id}')" title="Delete">🗑</button>
+        <div class="price-block">
+          <div class="price-row"><span class="tier">500 pcs</span><span>${fmtUSD(p.price500)}</span></div>
+          <div class="price-row"><span class="tier">1000 pcs</span><span>${fmtUSD(p.price1000)}</span></div>
         </div>
       </td>
-    </tr>
-  `).join('');
+      <td>
+        <div class="vnd">${fmtVND(p.prodCost)}</div>
+        ${usdEq ? `<div class="usd-eq">≈ $${usdEq}</div>` : ''}
+      </td>
+      <td><span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-disc'}">${p.status}</span></td>
+      <td style="max-width:140px; white-space:normal; font-size:12px; color:var(--text-muted)">${p.note || '—'}</td>
+      <td>
+        <div class="gap-8">
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editProduct('${p.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteProduct('${p.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 function openProductModal(id = null) {
@@ -375,44 +424,40 @@ function openProductModal(id = null) {
   document.getElementById('f_internalPN').value = p.internalPN || '';
   document.getElementById('f_productSKU').value = p.productSKU || '';
   document.getElementById('f_desc').value       = p.desc || '';
-  document.getElementById('f_unitPrice').value  = p.unitPrice || '';
+  document.getElementById('f_price500').value   = p.price500 || '';
+  document.getElementById('f_price1000').value  = p.price1000 || '';
   document.getElementById('f_prodCost').value   = p.prodCost || '';
   document.getElementById('f_status').value     = p.status || 'Active';
   document.getElementById('f_note').value       = p.note || '';
+  const usd = vndToUSD(p.prodCost);
+  document.getElementById('f_prodCostUSD').value = usd ? '$' + usd : '—';
   document.getElementById('productModal').classList.add('open');
 }
 
 function editProduct(id) { openProductModal(id); }
-
-function closeProductModal() {
-  document.getElementById('productModal').classList.remove('open');
-  editingProductId = null;
-}
+function closeProductModal() { document.getElementById('productModal').classList.remove('open'); editingProductId = null; }
 
 function saveProduct() {
   const custPN = document.getElementById('f_custPN').value.trim();
   const internalPN = document.getElementById('f_internalPN').value.trim();
   if (!custPN || !internalPN) { alert('Customer P/N and Internal P/N are required.'); return; }
-
   const product = {
     id: editingProductId || uid(),
-    custPN,
-    internalPN,
+    custPN, internalPN,
     productSKU: document.getElementById('f_productSKU').value.trim(),
     desc:       document.getElementById('f_desc').value.trim(),
-    unitPrice:  document.getElementById('f_unitPrice').value,
+    price500:   document.getElementById('f_price500').value,
+    price1000:  document.getElementById('f_price1000').value,
     prodCost:   document.getElementById('f_prodCost').value,
     status:     document.getElementById('f_status').value,
     note:       document.getElementById('f_note').value.trim(),
   };
-
   if (editingProductId) {
     const idx = state.products.findIndex(x => x.id === editingProductId);
     state.products[idx] = product;
   } else {
     state.products.push(product);
   }
-
   closeProductModal();
   renderProducts();
   saveToGithub();
@@ -450,41 +495,29 @@ async function testGithubConnection() {
     const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}`, {
       headers: { Authorization: `token ${github.token}` }
     });
-    if (r.ok) {
-      showGhMsg('✅ Connected successfully!', 'success');
-      updateSyncStatus(true);
-    } else {
-      const e = await r.json();
-      showGhMsg(`❌ Error: ${e.message}`, 'error');
-      updateSyncStatus(false);
-    }
-  } catch(e) { showGhMsg('❌ Network error. Check your connection.', 'error'); }
+    if (r.ok) { showGhMsg('✅ Connected successfully!', 'success'); updateSyncStatus(true); }
+    else { const e = await r.json(); showGhMsg(`❌ Error: ${e.message}`, 'error'); updateSyncStatus(false); }
+  } catch(e) { showGhMsg('❌ Network error.', 'error'); }
 }
 
 async function saveToGithub() {
   const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
-  if (!g.token || !g.user || !g.repo) return; // silent skip if not configured
+  if (!g.token || !g.user || !g.repo) return;
   github = g;
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
   try {
-    // Get current SHA if file exists
     let sha = '';
     const existing = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
       headers: { Authorization: `token ${github.token}` }
     });
     if (existing.ok) { const d = await existing.json(); sha = d.sha; }
-
     const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
       method: 'PUT',
       headers: { Authorization: `token ${github.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: 'Update tracker data', content, ...(sha && { sha }) })
     });
-    if (r.ok) {
-      updateSyncStatus(true);
-      showSyncFlash();
-    } else {
-      updateSyncStatus(false);
-    }
+    if (r.ok) { updateSyncStatus(true); showSyncFlash(); }
+    else updateSyncStatus(false);
   } catch(e) { updateSyncStatus(false); }
 }
 
@@ -502,12 +535,10 @@ async function loadFromGithub() {
       const json = decodeURIComponent(escape(atob(d.content)));
       state = JSON.parse(json);
       renderProducts();
-      showGhMsg('✅ Data loaded successfully!', 'success');
+      showGhMsg('✅ Data loaded!', 'success');
       updateSyncStatus(true);
-    } else {
-      showGhMsg('No data file found yet — that\'s OK if this is your first time.', 'info');
-    }
-  } catch(e) { showGhMsg('❌ Failed to load data.', 'error'); }
+    } else { showGhMsg('No data file found yet.', 'info'); }
+  } catch(e) { showGhMsg('❌ Failed to load.', 'error'); }
 }
 
 function updateSyncStatus(ok) {
@@ -515,21 +546,17 @@ function updateSyncStatus(ok) {
   el.textContent = ok ? '● Synced' : '● Sync error';
   el.className = 'sync-status ' + (ok ? 'ok' : 'err');
 }
-
 function showSyncFlash() {
   const el = document.getElementById('syncStatus');
-  const prev = el.textContent;
   el.textContent = '↑ Saving…';
   setTimeout(() => { el.textContent = '● Synced'; el.className = 'sync-status ok'; }, 1200);
 }
-
 function showGhMsg(msg, type) {
   const el = document.getElementById('ghMsg');
   el.textContent = msg;
-  el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary)';
+  el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary-dark)';
 }
 
-// ─── MANUAL BACKUP ────────────────────────────────────────────────────────────
 function exportJSON() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -537,17 +564,12 @@ function exportJSON() {
   a.download = `elecom-tracker-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
 }
-
 function importJSON(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    try {
-      state = JSON.parse(ev.target.result);
-      renderProducts();
-      alert('Data imported successfully.');
-    } catch { alert('Invalid JSON file.'); }
+    try { state = JSON.parse(ev.target.result); renderProducts(); alert('Imported successfully.'); }
+    catch { alert('Invalid JSON file.'); }
   };
   reader.readAsText(file);
   e.target.value = '';
@@ -559,15 +581,13 @@ function importJSON(e) {
   if (g.user && g.repo && g.token) {
     github = g;
     updateSyncStatus(true);
-    // Auto-load from GitHub on startup
     try {
       const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
         headers: { Authorization: `token ${github.token}` }
       });
       if (r.ok) {
         const d = await r.json();
-        const json = decodeURIComponent(escape(atob(d.content)));
-        state = JSON.parse(json);
+        state = JSON.parse(decodeURIComponent(escape(atob(d.content))));
         updateSyncStatus(true);
       }
     } catch(e) { updateSyncStatus(false); }
