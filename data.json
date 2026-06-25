@@ -58,5 +58,6 @@
     }
   ],
   "activeOrders": [],
-  "shippedOrders": []
+  "shippedOrders": [],
+  "fxRate": "2"
 }
