@@ -43,7 +43,6 @@
   .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
   .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
   .card-header h2 { font-size: 14px; font-weight: 600; }
-  .card-body { padding: 20px; }
 
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
   .btn-primary { background: var(--primary); color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.10); }
@@ -72,10 +71,8 @@
   .form-group input, .form-group select, .form-group textarea { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text); background: var(--white); transition: border 0.15s; }
   .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
   .form-group.full { grid-column: 1 / -1; }
-  .form-group.span2 { grid-column: span 2; }
 
-  .price-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .price-pair .sub-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .section-divider { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin: 4px 0 10px; grid-column: 1 / -1; }
 
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
   .modal-bg.open { display: flex; }
@@ -86,12 +83,8 @@
   .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
   .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; }
 
-  .section-divider { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); margin: 4px 0 10px; grid-column: 1 / -1; }
-
   .settings-section { margin-bottom: 24px; }
   .settings-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-  .input-row { display: flex; gap: 8px; }
-  .input-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 
   .alert { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
   .alert-info { background: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--border); }
@@ -107,18 +100,18 @@
   .mb-12 { margin-bottom: 12px; }
   .hidden { display: none; }
 
-  /* Exchange rate bar */
   .fx-bar { display: flex; align-items: center; gap: 10px; font-size: 13px; }
   .fx-bar label { font-weight: 600; color: var(--text-muted); white-space: nowrap; }
   .fx-bar input { width: 120px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
   .fx-bar .fx-note { font-size: 11px; color: var(--text-muted); }
 
-  .vnd { font-size: 11px; color: var(--text-muted); }
-  .usd-eq { font-size: 11px; color: var(--primary-dark); }
+  .price-block { line-height: 1.9; display: inline-block; }
+  .price-row { display: flex; align-items: center; gap: 6px; justify-content: flex-start; }
+  .price-row .tier { font-size: 11px; color: var(--text-muted); white-space: nowrap; width: 58px; }
+  .price-row .price-val { font-size: 13px; font-weight: 500; text-align: left; }
 
-  td .price-block { line-height: 1.8; }
-  td .price-row { display: flex; justify-content: space-between; gap: 8px; }
-  td .price-row .tier { font-size: 11px; color: var(--text-muted); }
+  .vnd { font-size: 13px; }
+  .usd-eq { font-size: 11px; color: var(--primary-dark); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -163,7 +156,7 @@
         <div class="gap-8">
           <div class="fx-bar">
             <label>1 USD =</label>
-            <input type="number" id="fxRate" placeholder="25000" onchange="onFxChange()">
+            <input type="number" id="fxRate" placeholder="e.g. 25000" oninput="onFxChange()">
             <span class="fx-note">VND &nbsp;(used to show cost in USD)</span>
           </div>
           <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add Product</button>
@@ -171,15 +164,15 @@
       </div>
       <div class="card-body" style="padding:0">
         <div class="tbl-wrap">
-          <table id="productTable">
+          <table>
             <thead>
               <tr>
                 <th>客人料號<br>Customer P/N</th>
                 <th>廠內料號<br>Internal P/N</th>
                 <th>Product SKU<br>(bare)</th>
                 <th>Description</th>
-                <th>Unit Price (USD)<br><span style="font-weight:400">500 pcs / 1000 pcs</span></th>
-                <th>Production Cost<br><span style="font-weight:400">VND (≈ USD)</span></th>
+                <th>Unit Price (USD)<br>500 pcs / 1000 pcs</th>
+                <th>Production Cost<br>VND (≈ USD)</th>
                 <th>Status</th>
                 <th>Note</th>
                 <th></th>
@@ -232,19 +225,19 @@
         <div class="section-divider">Pricing (USD)</div>
         <div class="form-group">
           <label>Unit Price — 500 pcs</label>
-          <input id="f_price500" type="number" step="0.0001" placeholder="0.0000">
+          <input id="f_price500" type="number" step="0.01" placeholder="0.00">
         </div>
         <div class="form-group">
           <label>Unit Price — 1000 pcs</label>
-          <input id="f_price1000" type="number" step="0.0001" placeholder="0.0000">
+          <input id="f_price1000" type="number" step="0.01" placeholder="0.00">
         </div>
 
         <div class="section-divider">Production Cost</div>
         <div class="form-group">
           <label>Production Cost (VND)</label>
-          <input id="f_prodCost" type="number" step="1" placeholder="e.g. 85000">
+          <input id="f_prodCost" type="number" step="1" placeholder="e.g. 85000" oninput="updateModalUSDPreview()">
         </div>
-        <div class="form-group" style="justify-content:flex-end; padding-bottom:2px">
+        <div class="form-group">
           <label>≈ USD (at current rate)</label>
           <input id="f_prodCostUSD" readonly placeholder="—" style="background:var(--bg); color:var(--text-muted);">
         </div>
@@ -280,7 +273,7 @@
     <div class="modal-body">
       <div class="settings-section">
         <h3>🔗 GitHub Integration</h3>
-        <div class="alert alert-info" style="margin-bottom:14px">
+        <div class="alert alert-info">
           Data is saved to a <code>data.json</code> file in your GitHub repo. Your token is stored only in this browser.
         </div>
         <div class="form-group mb-12">
@@ -317,109 +310,115 @@
 </div>
 
 <script>
-let state = {
+var state = {
   fxRate: '',
   products: [
-    { id: uid(), custPN: 'P-DSMMWBK',  internalPN: '8ELB130001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'P-DSMMWWH',  internalPN: '8ELB130002', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'P-DSMMWPN',  internalPN: '8ELB130003', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'PWCARS18BK', internalPN: '8ELC130001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
-    { id: uid(), custPN: 'P-CARS18BK', internalPN: '8ELB040001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: 'p1', custPN: 'P-DSMMWBK',  internalPN: '8ELB130001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: 'p2', custPN: 'P-DSMMWWH',  internalPN: '8ELB130002', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: 'p3', custPN: 'P-DSMMWPN',  internalPN: '8ELB130003', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: 'p4', custPN: 'PWCARS18BK', internalPN: '8ELC130001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' },
+    { id: 'p5', custPN: 'P-CARS18BK', internalPN: '8ELB040001', productSKU: '', desc: '', price500: '', price1000: '', prodCost: '', status: 'Active', note: '' }
   ],
   activeOrders: [],
   shippedOrders: []
 };
 
-let github = { user: '', repo: '', token: '' };
-let editingProductId = null;
+var github = { user: '', repo: '', token: '' };
+var editingProductId = null;
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
 function fmtUSD(val) {
-  if (val === '' || val == null) return '—';
-  return '$' + Number(val).toFixed(4);
+  if (val === '' || val === null || val === undefined) return '—';
+  return '$' + Number(val).toFixed(2);
 }
 
 function fmtVND(val) {
-  if (val === '' || val == null) return '—';
+  if (val === '' || val === null || val === undefined) return '—';
   return Number(val).toLocaleString() + ' ₫';
 }
 
 function vndToUSD(vnd) {
-  const rate = parseFloat(state.fxRate);
-  if (!rate || !vnd) return null;
-  return (parseFloat(vnd) / rate).toFixed(4);
+  var rate = parseFloat(state.fxRate);
+  if (!rate || !vnd || vnd === '') return null;
+  return (parseFloat(vnd) / rate).toFixed(2);
 }
 
-// ─── FX RATE ──────────────────────────────────────────────────────────────────
 function onFxChange() {
   state.fxRate = document.getElementById('fxRate').value;
   renderProducts();
   saveToGithub();
 }
 
-// Update modal USD preview as user types VND cost
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('f_prodCost').addEventListener('input', updateModalUSDPreview);
-});
-
 function updateModalUSDPreview() {
-  const vnd = document.getElementById('f_prodCost').value;
-  const usd = vndToUSD(vnd);
+  var vnd = document.getElementById('f_prodCost').value;
+  var usd = vndToUSD(vnd);
   document.getElementById('f_prodCostUSD').value = usd ? '$' + usd : '—';
 }
 
-// ─── TABS ─────────────────────────────────────────────────────────────────────
 function switchTab(name) {
-  const names = ['active','shipped','products','dev'];
-  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
-  names.forEach(n => document.getElementById('tab-'+n).classList.toggle('hidden', n !== name));
+  var names = ['active', 'shipped', 'products', 'dev'];
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.toggle('active', names[i] === name);
+  }
+  for (var j = 0; j < names.length; j++) {
+    var el = document.getElementById('tab-' + names[j]);
+    if (el) el.classList.toggle('hidden', names[j] !== name);
+  }
 }
 
-// ─── PRODUCT MASTER ───────────────────────────────────────────────────────────
 function renderProducts() {
-  // sync FX rate input
-  document.getElementById('fxRate').value = state.fxRate || '';
+  var fxEl = document.getElementById('fxRate');
+  if (fxEl) fxEl.value = state.fxRate || '';
 
-  const tbody = document.getElementById('productBody');
-  if (!state.products.length) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No products yet.</td></tr>`;
+  var tbody = document.getElementById('productBody');
+  if (!tbody) return;
+  if (!state.products || !state.products.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No products yet.</td></tr>';
     return;
   }
-  tbody.innerHTML = state.products.map(p => {
-    const usdEq = vndToUSD(p.prodCost);
-    return `
-    <tr>
-      <td><span class="mono">${p.custPN}</span></td>
-      <td><span class="mono">${p.internalPN}</span></td>
-      <td><span class="mono">${p.productSKU || '—'}</span></td>
-      <td style="color:var(--text-muted)">${p.desc || '—'}</td>
-      <td>
-        <div class="price-block">
-          <div class="price-row"><span class="tier">500 pcs</span><span>${fmtUSD(p.price500)}</span></div>
-          <div class="price-row"><span class="tier">1000 pcs</span><span>${fmtUSD(p.price1000)}</span></div>
-        </div>
-      </td>
-      <td>
-        <div class="vnd">${fmtVND(p.prodCost)}</div>
-        ${usdEq ? `<div class="usd-eq">≈ $${usdEq}</div>` : ''}
-      </td>
-      <td><span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-disc'}">${p.status}</span></td>
-      <td style="max-width:140px; white-space:normal; font-size:12px; color:var(--text-muted)">${p.note || '—'}</td>
-      <td>
-        <div class="gap-8">
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="editProduct('${p.id}')">✏️</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteProduct('${p.id}')">🗑</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+
+  var rows = '';
+  for (var i = 0; i < state.products.length; i++) {
+    var p = state.products[i];
+    var usdEq = vndToUSD(p.prodCost);
+    var costHtml = fmtVND(p.prodCost);
+    if (usdEq) {
+      costHtml += '<div class="usd-eq">≈ $' + usdEq + '</div>';
+    } else {
+      costHtml += '<div class="usd-eq" style="color:var(--border)">—</div>';
+    }
+    rows += '<tr>' +
+      '<td><span class="mono">' + p.custPN + '</span></td>' +
+      '<td><span class="mono">' + p.internalPN + '</span></td>' +
+      '<td><span class="mono">' + (p.productSKU || '—') + '</span></td>' +
+      '<td style="color:var(--text-muted)">' + (p.desc || '—') + '</td>' +
+      '<td><div class="price-block">' +
+        '<div class="price-row"><span class="tier">500 pcs</span><span class="price-val">' + fmtUSD(p.price500) + '</span></div>' +
+        '<div class="price-row"><span class="tier">1000 pcs</span><span class="price-val">' + fmtUSD(p.price1000) + '</span></div>' +
+      '</div></td>' +
+      '<td>' + costHtml + '</td>' +
+      '<td><span class="badge ' + (p.status === 'Active' ? 'badge-active' : 'badge-disc') + '">' + p.status + '</span></td>' +
+      '<td style="max-width:140px;white-space:normal;font-size:12px;color:var(--text-muted)">' + (p.note || '—') + '</td>' +
+      '<td><div class="gap-8">' +
+        '<button class="btn btn-secondary btn-sm btn-icon" onclick="editProduct(\'' + p.id + '\')">✏️</button>' +
+        '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteProduct(\'' + p.id + '\')">🗑</button>' +
+      '</div></td>' +
+    '</tr>';
+  }
+  tbody.innerHTML = rows;
 }
 
-function openProductModal(id = null) {
-  editingProductId = id;
+function openProductModal(id) {
+  editingProductId = id || null;
   document.getElementById('productModalTitle').textContent = id ? 'Edit Product' : 'Add Product';
-  const p = id ? state.products.find(x => x.id === id) : {};
+  var p = {};
+  if (id) {
+    for (var i = 0; i < state.products.length; i++) {
+      if (state.products[i].id === id) { p = state.products[i]; break; }
+    }
+  }
   document.getElementById('f_custPN').value     = p.custPN || '';
   document.getElementById('f_internalPN').value = p.internalPN || '';
   document.getElementById('f_productSKU').value = p.productSKU || '';
@@ -429,32 +428,38 @@ function openProductModal(id = null) {
   document.getElementById('f_prodCost').value   = p.prodCost || '';
   document.getElementById('f_status').value     = p.status || 'Active';
   document.getElementById('f_note').value       = p.note || '';
-  const usd = vndToUSD(p.prodCost);
+  var usd = vndToUSD(p.prodCost);
   document.getElementById('f_prodCostUSD').value = usd ? '$' + usd : '—';
   document.getElementById('productModal').classList.add('open');
 }
 
 function editProduct(id) { openProductModal(id); }
-function closeProductModal() { document.getElementById('productModal').classList.remove('open'); editingProductId = null; }
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+  editingProductId = null;
+}
 
 function saveProduct() {
-  const custPN = document.getElementById('f_custPN').value.trim();
-  const internalPN = document.getElementById('f_internalPN').value.trim();
+  var custPN = document.getElementById('f_custPN').value.trim();
+  var internalPN = document.getElementById('f_internalPN').value.trim();
   if (!custPN || !internalPN) { alert('Customer P/N and Internal P/N are required.'); return; }
-  const product = {
+  var product = {
     id: editingProductId || uid(),
-    custPN, internalPN,
+    custPN: custPN,
+    internalPN: internalPN,
     productSKU: document.getElementById('f_productSKU').value.trim(),
-    desc:       document.getElementById('f_desc').value.trim(),
-    price500:   document.getElementById('f_price500').value,
-    price1000:  document.getElementById('f_price1000').value,
-    prodCost:   document.getElementById('f_prodCost').value,
-    status:     document.getElementById('f_status').value,
-    note:       document.getElementById('f_note').value.trim(),
+    desc:        document.getElementById('f_desc').value.trim(),
+    price500:    document.getElementById('f_price500').value,
+    price1000:   document.getElementById('f_price1000').value,
+    prodCost:    document.getElementById('f_prodCost').value,
+    status:      document.getElementById('f_status').value,
+    note:        document.getElementById('f_note').value.trim()
   };
   if (editingProductId) {
-    const idx = state.products.findIndex(x => x.id === editingProductId);
-    state.products[idx] = product;
+    for (var i = 0; i < state.products.length; i++) {
+      if (state.products[i].id === editingProductId) { state.products[i] = product; break; }
+    }
   } else {
     state.products.push(product);
   }
@@ -465,14 +470,13 @@ function saveProduct() {
 
 function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  state.products = state.products.filter(x => x.id !== id);
+  state.products = state.products.filter(function(x) { return x.id !== id; });
   renderProducts();
   saveToGithub();
 }
 
-// ─── GITHUB ───────────────────────────────────────────────────────────────────
 function openSettings() {
-  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+  var g = JSON.parse(localStorage.getItem('gh_config') || '{}');
   document.getElementById('cfg_user').value  = g.user  || '';
   document.getElementById('cfg_repo').value  = g.repo  || 'elecom-tracker';
   document.getElementById('cfg_token').value = g.token || '';
@@ -489,110 +493,116 @@ function saveGithubConfig() {
   testGithubConnection();
 }
 
-async function testGithubConnection() {
+function testGithubConnection() {
   showGhMsg('Testing connection…', 'info');
-  try {
-    const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}`, {
-      headers: { Authorization: `token ${github.token}` }
-    });
+  fetch('https://api.github.com/repos/' + github.user + '/' + github.repo, {
+    headers: { Authorization: 'token ' + github.token }
+  }).then(function(r) {
     if (r.ok) { showGhMsg('✅ Connected successfully!', 'success'); updateSyncStatus(true); }
-    else { const e = await r.json(); showGhMsg(`❌ Error: ${e.message}`, 'error'); updateSyncStatus(false); }
-  } catch(e) { showGhMsg('❌ Network error.', 'error'); }
+    else { r.json().then(function(e) { showGhMsg('❌ Error: ' + e.message, 'error'); }); updateSyncStatus(false); }
+  }).catch(function() { showGhMsg('❌ Network error.', 'error'); });
 }
 
-async function saveToGithub() {
-  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+function saveToGithub() {
+  var g = JSON.parse(localStorage.getItem('gh_config') || '{}');
   if (!g.token || !g.user || !g.repo) return;
   github = g;
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
-  try {
-    let sha = '';
-    const existing = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
-      headers: { Authorization: `token ${github.token}` }
-    });
-    if (existing.ok) { const d = await existing.json(); sha = d.sha; }
-    const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+  fetch('https://api.github.com/repos/' + github.user + '/' + github.repo + '/contents/data.json', {
+    headers: { Authorization: 'token ' + github.token }
+  }).then(function(r) {
+    return r.ok ? r.json() : null;
+  }).then(function(d) {
+    var sha = d ? d.sha : '';
+    var body = { message: 'Update tracker data', content: content };
+    if (sha) body.sha = sha;
+    return fetch('https://api.github.com/repos/' + github.user + '/' + github.repo + '/contents/data.json', {
       method: 'PUT',
-      headers: { Authorization: `token ${github.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Update tracker data', content, ...(sha && { sha }) })
+      headers: { Authorization: 'token ' + github.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
-    if (r.ok) { updateSyncStatus(true); showSyncFlash(); }
+  }).then(function(r) {
+    if (r && r.ok) { updateSyncStatus(true); showSyncFlash(); }
     else updateSyncStatus(false);
-  } catch(e) { updateSyncStatus(false); }
+  }).catch(function() { updateSyncStatus(false); });
 }
 
-async function loadFromGithub() {
-  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+function loadFromGithub() {
+  var g = JSON.parse(localStorage.getItem('gh_config') || '{}');
   if (!g.token) { showGhMsg('Please save your GitHub config first.', 'error'); return; }
   github = g;
   showGhMsg('Loading data…', 'info');
-  try {
-    const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
-      headers: { Authorization: `token ${github.token}` }
-    });
+  fetch('https://api.github.com/repos/' + github.user + '/' + github.repo + '/contents/data.json', {
+    headers: { Authorization: 'token ' + github.token }
+  }).then(function(r) {
     if (r.ok) {
-      const d = await r.json();
-      const json = decodeURIComponent(escape(atob(d.content)));
-      state = JSON.parse(json);
-      renderProducts();
-      showGhMsg('✅ Data loaded!', 'success');
-      updateSyncStatus(true);
+      return r.json().then(function(d) {
+        state = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+        renderProducts();
+        showGhMsg('✅ Data loaded!', 'success');
+        updateSyncStatus(true);
+      });
     } else { showGhMsg('No data file found yet.', 'info'); }
-  } catch(e) { showGhMsg('❌ Failed to load.', 'error'); }
+  }).catch(function() { showGhMsg('❌ Failed to load.', 'error'); });
 }
 
 function updateSyncStatus(ok) {
-  const el = document.getElementById('syncStatus');
+  var el = document.getElementById('syncStatus');
   el.textContent = ok ? '● Synced' : '● Sync error';
   el.className = 'sync-status ' + (ok ? 'ok' : 'err');
 }
+
 function showSyncFlash() {
-  const el = document.getElementById('syncStatus');
+  var el = document.getElementById('syncStatus');
   el.textContent = '↑ Saving…';
-  setTimeout(() => { el.textContent = '● Synced'; el.className = 'sync-status ok'; }, 1200);
+  setTimeout(function() { el.textContent = '● Synced'; el.className = 'sync-status ok'; }, 1200);
 }
+
 function showGhMsg(msg, type) {
-  const el = document.getElementById('ghMsg');
+  var el = document.getElementById('ghMsg');
   el.textContent = msg;
   el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary-dark)';
 }
 
 function exportJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
+  var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `elecom-tracker-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = 'elecom-tracker-' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
 }
+
 function importJSON(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
+  var file = e.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
     try { state = JSON.parse(ev.target.result); renderProducts(); alert('Imported successfully.'); }
-    catch { alert('Invalid JSON file.'); }
+    catch(err) { alert('Invalid JSON file.'); }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-(async function init() {
-  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+// Init
+(function() {
+  var g = JSON.parse(localStorage.getItem('gh_config') || '{}');
   if (g.user && g.repo && g.token) {
     github = g;
     updateSyncStatus(true);
-    try {
-      const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
-        headers: { Authorization: `token ${github.token}` }
-      });
+    fetch('https://api.github.com/repos/' + github.user + '/' + github.repo + '/contents/data.json', {
+      headers: { Authorization: 'token ' + github.token }
+    }).then(function(r) {
       if (r.ok) {
-        const d = await r.json();
-        state = JSON.parse(decodeURIComponent(escape(atob(d.content))));
-        updateSyncStatus(true);
-      }
-    } catch(e) { updateSyncStatus(false); }
+        return r.json().then(function(d) {
+          state = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+          updateSyncStatus(true);
+          renderProducts();
+        });
+      } else { renderProducts(); }
+    }).catch(function() { updateSyncStatus(false); renderProducts(); });
+  } else {
+    renderProducts();
   }
-  renderProducts();
 })();
 </script>
 </body>
