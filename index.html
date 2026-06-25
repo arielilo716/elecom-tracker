@@ -554,9 +554,24 @@ function importJSON(e) {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-(function init() {
+(async function init() {
   const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
-  if (g.user) { github = g; updateSyncStatus(true); }
+  if (g.user && g.repo && g.token) {
+    github = g;
+    updateSyncStatus(true);
+    // Auto-load from GitHub on startup
+    try {
+      const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
+        headers: { Authorization: `token ${github.token}` }
+      });
+      if (r.ok) {
+        const d = await r.json();
+        const json = decodeURIComponent(escape(atob(d.content)));
+        state = JSON.parse(json);
+        updateSyncStatus(true);
+      }
+    } catch(e) { updateSyncStatus(false); }
+  }
   renderProducts();
 })();
 </script>
