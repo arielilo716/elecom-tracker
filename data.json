@@ -1,10 +1,10 @@
 {
   "products": [
     {
-      "id": "mqt4wdce83bzf",
+      "id": "mqt5isgyguvty",
       "custPN": "P-DSMMWBK",
       "internalPN": "8ELB130001",
-      "productSKU": "6MT1300152",
+      "productSKU": "",
       "desc": "",
       "unitPrice": "",
       "prodCost": "",
@@ -12,7 +12,7 @@
       "note": ""
     },
     {
-      "id": "mqt4wdce1mnac",
+      "id": "mqt5isgy201nd",
       "custPN": "P-DSMMWWH",
       "internalPN": "8ELB130002",
       "productSKU": "",
@@ -23,7 +23,7 @@
       "note": ""
     },
     {
-      "id": "mqt4wdce6lc4t",
+      "id": "mqt5isgyz8wko",
       "custPN": "P-DSMMWPN",
       "internalPN": "8ELB130003",
       "productSKU": "",
@@ -34,7 +34,7 @@
       "note": ""
     },
     {
-      "id": "mqt4wdcemc413",
+      "id": "mqt5isgy5a7ay",
       "custPN": "PWCARS18BK",
       "internalPN": "8ELC130001",
       "productSKU": "",
@@ -45,7 +45,7 @@
       "note": ""
     },
     {
-      "id": "mqt4wdcekbzbo",
+      "id": "mqt5isgy2wbo9",
       "custPN": "P-CARS18BK",
       "internalPN": "8ELB040001",
       "productSKU": "",
