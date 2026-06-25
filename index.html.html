@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELECOM ASIA Order Tracker</title>
+<style>
+  :root {
+    --bg: #f2f8f4;
+    --white: #ffffff;
+    --border: #c8e0d1;
+    --primary: #68BE8D;
+    --primary-dark: #4da674;
+    --primary-light: #eaf6ef;
+    --text: #1a2e22;
+    --text-muted: #557a63;
+    --green: #2e7d4f;
+    --green-light: #eaf6ef;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --yellow: #ca8a04;
+    --yellow-light: #fefce8;
+    --shadow: 0 1px 3px rgba(104,190,141,0.10), 0 1px 2px rgba(0,0,0,0.04);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* Header */
+  .app-header { background: var(--primary); color: white; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 52px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .app-header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .sync-status { font-size: 12px; opacity: 0.85; }
+  .sync-status.ok { color: #86efac; }
+  .sync-status.err { color: #fca5a5; }
+
+  /* Nav Tabs */
+  .nav-tabs { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+  .nav-tab { padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+  .nav-tab:hover { color: var(--primary); }
+  .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* Main content */
+  .main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+  /* Cards */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-header h2 { font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: var(--primary); color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.10); }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-icon { padding: 6px 8px; }
+
+  /* Table */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--bg); text-align: left; padding: 9px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--primary-light); }
+
+  /* Badge */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .badge-active { background: var(--green-light); color: var(--green); }
+  .badge-disc { background: var(--bg); color: var(--text-muted); }
+  .badge-dev { background: var(--yellow-light); color: var(--yellow); }
+
+  /* Form */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .form-group input, .form-group select, .form-group textarea { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text); background: var(--white); transition: border 0.15s; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+  .form-group.full { grid-column: 1 / -1; }
+
+  /* Modal */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--white); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+  .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { font-size: 15px; font-weight: 600; }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+  .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+
+  /* Settings panel */
+  .settings-section { margin-bottom: 24px; }
+  .settings-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .input-row { display: flex; gap: 8px; }
+  .input-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+
+  /* Alert */
+  .alert { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
+  .alert-info { background: var(--primary-light); color: var(--primary); border: 1px solid #bfdbfe; }
+  .alert-success { background: var(--green-light); color: var(--green); border: 1px solid #bbf7d0; }
+  .alert-error { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+
+  /* Placeholder tabs */
+  .placeholder-tab { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+  .placeholder-tab .icon { font-size: 48px; margin-bottom: 16px; }
+  .placeholder-tab h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+  .placeholder-tab p { font-size: 13px; line-height: 1.6; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+
+  /* Tag */
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+
+  .gap-8 { display: flex; gap: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<div class="app-header">
+  <h1>📦 ELECOM ASIA Order Tracker</h1>
+  <div class="header-right">
+    <span class="sync-status" id="syncStatus">● Not connected</span>
+    <button class="btn btn-secondary btn-sm" onclick="openSettings()">⚙️ Settings</button>
+  </div>
+</div>
+
+<!-- Nav Tabs -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('active')">📋 Active Orders</div>
+  <div class="nav-tab" onclick="switchTab('shipped')">🚢 Shipped & Payment</div>
+  <div class="nav-tab" onclick="switchTab('products')">📦 Product Master</div>
+  <div class="nav-tab" onclick="switchTab('dev')">🔧 In Development</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- TAB: Active Orders (placeholder) -->
+  <div id="tab-active">
+    <div class="placeholder-tab">
+      <div class="icon">📋</div>
+      <h3>Active Orders — Coming in Stage 2</h3>
+      <p>This tab will track open POs by phase, with Excel upload,<br>TWX checklists, and deadline alerts.</p>
+    </div>
+  </div>
+
+  <!-- TAB: Shipped & Payment (placeholder) -->
+  <div id="tab-shipped" class="hidden">
+    <div class="placeholder-tab">
+      <div class="icon">🚢</div>
+      <h3>Shipped Orders & Payment — Coming in Stage 3</h3>
+      <p>This tab will track post-shipment details, dual-port<br>shipping info, and TT90 payment status.</p>
+    </div>
+  </div>
+
+  <!-- TAB: Product Master -->
+  <div id="tab-products" class="hidden">
+    <div class="card">
+      <div class="card-header">
+        <h2>📦 Product Master — ELECOM ASIA</h2>
+        <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add Product</button>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="tbl-wrap">
+          <table id="productTable">
+            <thead>
+              <tr>
+                <th>客人料號<br><span style="font-weight:400">Customer P/N</span></th>
+                <th>廠內料號<br><span style="font-weight:400">Internal P/N</span></th>
+                <th>Product SKU<br><span style="font-weight:400">Bare product</span></th>
+                <th>Description</th>
+                <th>Unit Price<br><span style="font-weight:400">USD</span></th>
+                <th>Production Cost<br><span style="font-weight:400">USD</span></th>
+                <th>Status</th>
+                <th>Note</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="productBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: In Development (placeholder) -->
+  <div id="tab-dev" class="hidden">
+    <div class="placeholder-tab">
+      <div class="icon">🔧</div>
+      <h3>Products in Development — Coming Later</h3>
+      <p>This tab will track NPI, sampling, and tooling stage items.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL: Add / Edit Product -->
+<div class="modal-bg" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="productModalTitle">Add Product</h3>
+      <button class="close-btn" onclick="closeProductModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>客人料號 Customer P/N *</label>
+          <input id="f_custPN" placeholder="e.g. P-DSMMWBK">
+        </div>
+        <div class="form-group">
+          <label>廠內料號 Internal P/N *</label>
+          <input id="f_internalPN" placeholder="e.g. 8ELB130001">
+        </div>
+        <div class="form-group">
+          <label>Product SKU (bare)</label>
+          <input id="f_productSKU" placeholder="e.g. DSMMWBK">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input id="f_desc" placeholder="e.g. Desktop Stand Mini">
+        </div>
+        <div class="form-group">
+          <label>Unit Price (USD)</label>
+          <input id="f_unitPrice" type="number" step="0.0001" placeholder="0.0000">
+        </div>
+        <div class="form-group">
+          <label>Production Cost (USD)</label>
+          <input id="f_prodCost" type="number" step="0.0001" placeholder="0.0000">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="f_status">
+            <option value="Active">Active</option>
+            <option value="Discontinued">Discontinued</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Note</label>
+          <textarea id="f_note" rows="2" placeholder="Any notes..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Settings / GitHub -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>⚙️ Settings</h3>
+      <button class="close-btn" onclick="closeSettings()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="settings-section">
+        <h3>🔗 GitHub Integration</h3>
+        <div class="alert alert-info" style="margin-bottom:14px">
+          Data is saved to a <code>data.json</code> file in your GitHub repo. Your token is stored only in this browser.
+        </div>
+        <div class="form-group mb-16">
+          <label>GitHub Username</label>
+          <input id="cfg_user" placeholder="your-github-username">
+        </div>
+        <div class="form-group mb-16">
+          <label>Repository Name</label>
+          <input id="cfg_repo" placeholder="elecom-tracker">
+        </div>
+        <div class="form-group mb-16">
+          <label>Personal Access Token (repo scope)</label>
+          <input id="cfg_token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+        <div class="gap-8">
+          <button class="btn btn-primary" onclick="saveGithubConfig()">Save & Test Connection</button>
+          <button class="btn btn-secondary" onclick="loadFromGithub()">↓ Load Data</button>
+        </div>
+        <div id="ghMsg" style="margin-top:10px; font-size:13px;"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>💾 Manual Backup</h3>
+        <div class="gap-8">
+          <button class="btn btn-secondary" onclick="exportJSON()">↓ Export JSON</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">↑ Import JSON</button>
+          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importJSON(event)">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  products: [
+    { id: uid(), custPN: 'P-DSMMWBK',  internalPN: '8ELB130001', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-DSMMWWH',  internalPN: '8ELB130002', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-DSMMWPN',  internalPN: '8ELB130003', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'PWCARS18BK', internalPN: '8ELC130001', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
+    { id: uid(), custPN: 'P-CARS18BK', internalPN: '8ELB040001', productSKU: '', desc: '', unitPrice: '', prodCost: '', status: 'Active', note: '' },
+  ],
+  activeOrders: [],
+  shippedOrders: []
+};
+
+let github = { user: '', repo: '', token: '' };
+let editingProductId = null;
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function fmt(val, prefix='') {
+  if (val === '' || val === null || val === undefined) return '—';
+  return prefix + Number(val).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    const names = ['active','shipped','products','dev'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  ['active','shipped','products','dev'].forEach(n => {
+    document.getElementById('tab-'+n).classList.toggle('hidden', n !== name);
+  });
+}
+
+// ─── PRODUCT MASTER ───────────────────────────────────────────────────────────
+function renderProducts() {
+  const tbody = document.getElementById('productBody');
+  if (!state.products.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No products yet. Click "+ Add Product" to begin.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = state.products.map(p => `
+    <tr>
+      <td><span class="mono">${p.custPN}</span></td>
+      <td><span class="mono">${p.internalPN}</span></td>
+      <td><span class="mono">${p.productSKU || '—'}</span></td>
+      <td>${p.desc || '—'}</td>
+      <td>${fmt(p.unitPrice, '$')}</td>
+      <td>${fmt(p.prodCost, '$')}</td>
+      <td><span class="badge ${p.status === 'Active' ? 'badge-active' : 'badge-disc'}">${p.status}</span></td>
+      <td style="max-width:160px; white-space:normal; font-size:12px; color:var(--text-muted)">${p.note || '—'}</td>
+      <td>
+        <div class="gap-8">
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editProduct('${p.id}')" title="Edit">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteProduct('${p.id}')" title="Delete">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openProductModal(id = null) {
+  editingProductId = id;
+  document.getElementById('productModalTitle').textContent = id ? 'Edit Product' : 'Add Product';
+  const p = id ? state.products.find(x => x.id === id) : {};
+  document.getElementById('f_custPN').value     = p.custPN || '';
+  document.getElementById('f_internalPN').value = p.internalPN || '';
+  document.getElementById('f_productSKU').value = p.productSKU || '';
+  document.getElementById('f_desc').value       = p.desc || '';
+  document.getElementById('f_unitPrice').value  = p.unitPrice || '';
+  document.getElementById('f_prodCost').value   = p.prodCost || '';
+  document.getElementById('f_status').value     = p.status || 'Active';
+  document.getElementById('f_note').value       = p.note || '';
+  document.getElementById('productModal').classList.add('open');
+}
+
+function editProduct(id) { openProductModal(id); }
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+  editingProductId = null;
+}
+
+function saveProduct() {
+  const custPN = document.getElementById('f_custPN').value.trim();
+  const internalPN = document.getElementById('f_internalPN').value.trim();
+  if (!custPN || !internalPN) { alert('Customer P/N and Internal P/N are required.'); return; }
+
+  const product = {
+    id: editingProductId || uid(),
+    custPN,
+    internalPN,
+    productSKU: document.getElementById('f_productSKU').value.trim(),
+    desc:       document.getElementById('f_desc').value.trim(),
+    unitPrice:  document.getElementById('f_unitPrice').value,
+    prodCost:   document.getElementById('f_prodCost').value,
+    status:     document.getElementById('f_status').value,
+    note:       document.getElementById('f_note').value.trim(),
+  };
+
+  if (editingProductId) {
+    const idx = state.products.findIndex(x => x.id === editingProductId);
+    state.products[idx] = product;
+  } else {
+    state.products.push(product);
+  }
+
+  closeProductModal();
+  renderProducts();
+  saveToGithub();
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  state.products = state.products.filter(x => x.id !== id);
+  renderProducts();
+  saveToGithub();
+}
+
+// ─── GITHUB ───────────────────────────────────────────────────────────────────
+function openSettings() {
+  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+  document.getElementById('cfg_user').value  = g.user  || '';
+  document.getElementById('cfg_repo').value  = g.repo  || 'elecom-tracker';
+  document.getElementById('cfg_token').value = g.token || '';
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+
+function saveGithubConfig() {
+  github.user  = document.getElementById('cfg_user').value.trim();
+  github.repo  = document.getElementById('cfg_repo').value.trim();
+  github.token = document.getElementById('cfg_token').value.trim();
+  if (!github.user || !github.repo || !github.token) { showGhMsg('Please fill in all three fields.', 'error'); return; }
+  localStorage.setItem('gh_config', JSON.stringify(github));
+  testGithubConnection();
+}
+
+async function testGithubConnection() {
+  showGhMsg('Testing connection…', 'info');
+  try {
+    const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}`, {
+      headers: { Authorization: `token ${github.token}` }
+    });
+    if (r.ok) {
+      showGhMsg('✅ Connected successfully!', 'success');
+      updateSyncStatus(true);
+    } else {
+      const e = await r.json();
+      showGhMsg(`❌ Error: ${e.message}`, 'error');
+      updateSyncStatus(false);
+    }
+  } catch(e) { showGhMsg('❌ Network error. Check your connection.', 'error'); }
+}
+
+async function saveToGithub() {
+  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+  if (!g.token || !g.user || !g.repo) return; // silent skip if not configured
+  github = g;
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+  try {
+    // Get current SHA if file exists
+    let sha = '';
+    const existing = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
+      headers: { Authorization: `token ${github.token}` }
+    });
+    if (existing.ok) { const d = await existing.json(); sha = d.sha; }
+
+    const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${github.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update tracker data', content, ...(sha && { sha }) })
+    });
+    if (r.ok) {
+      updateSyncStatus(true);
+      showSyncFlash();
+    } else {
+      updateSyncStatus(false);
+    }
+  } catch(e) { updateSyncStatus(false); }
+}
+
+async function loadFromGithub() {
+  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+  if (!g.token) { showGhMsg('Please save your GitHub config first.', 'error'); return; }
+  github = g;
+  showGhMsg('Loading data…', 'info');
+  try {
+    const r = await fetch(`https://api.github.com/repos/${github.user}/${github.repo}/contents/data.json`, {
+      headers: { Authorization: `token ${github.token}` }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      const json = decodeURIComponent(escape(atob(d.content)));
+      state = JSON.parse(json);
+      renderProducts();
+      showGhMsg('✅ Data loaded successfully!', 'success');
+      updateSyncStatus(true);
+    } else {
+      showGhMsg('No data file found yet — that\'s OK if this is your first time.', 'info');
+    }
+  } catch(e) { showGhMsg('❌ Failed to load data.', 'error'); }
+}
+
+function updateSyncStatus(ok) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = ok ? '● Synced' : '● Sync error';
+  el.className = 'sync-status ' + (ok ? 'ok' : 'err');
+}
+
+function showSyncFlash() {
+  const el = document.getElementById('syncStatus');
+  const prev = el.textContent;
+  el.textContent = '↑ Saving…';
+  setTimeout(() => { el.textContent = '● Synced'; el.className = 'sync-status ok'; }, 1200);
+}
+
+function showGhMsg(msg, type) {
+  const el = document.getElementById('ghMsg');
+  el.textContent = msg;
+  el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary)';
+}
+
+// ─── MANUAL BACKUP ────────────────────────────────────────────────────────────
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `elecom-tracker-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      state = JSON.parse(ev.target.result);
+      renderProducts();
+      alert('Data imported successfully.');
+    } catch { alert('Invalid JSON file.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init() {
+  const g = JSON.parse(localStorage.getItem('gh_config') || '{}');
+  if (g.user) { github = g; updateSyncStatus(true); }
+  renderProducts();
+})();
+</script>
+</body>
+</html>
