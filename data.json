@@ -60,7 +60,7 @@
   "activeOrders": [
     {
       "id": "mqw0j300orv9w",
-      "phase": 1,
+      "phase": 2,
       "signBackDate": "",
       "twxConfirmed": true,
       "orderIssued": false,
