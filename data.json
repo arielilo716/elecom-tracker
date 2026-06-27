@@ -32,7 +32,7 @@
       "desc": "健身支架_粉色_彩盒包裝",
       "price500": "4.55",
       "price1000": "4.35",
-      "prodCost": "",
+      "prodCost": "63481",
       "status": "Active",
       "note": ""
     },
@@ -140,5 +140,5 @@
     }
   ],
   "shippedOrders": [],
-  "fxRate": "2600"
+  "fxRate": "26000"
 }
