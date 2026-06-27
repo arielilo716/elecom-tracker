@@ -59,34 +59,7 @@
       "note": ""
     }
   ],
-  "activeOrders": [
-    {
-      "id": "mqw0jmdaue6us",
-      "phase": 1,
-      "signBackDate": "",
-      "twxConfirmed": false,
-      "orderIssued": false,
-      "pcNotified": false,
-      "inspEmailDate": "",
-      "inspNoticeDate": "",
-      "twxShipDone": false,
-      "adjLog": [],
-      "poBase": "PUO202505770",
-      "orderDate": "2026-06-27",
-      "custPN": "P-DSMMWWH",
-      "internalPN": "8ELB130002",
-      "qtyKana": 728,
-      "qtyKobe": 700,
-      "qtyCombined": 1428,
-      "factoryConfirm": "2026-01-23",
-      "inspDate": "",
-      "price": 4.35,
-      "orderNo": "CS302-2512020003",
-      "reqNo": "CP018-2512020002",
-      "purchNo": "PC813-2512020001",
-      "note": ""
-    }
-  ],
+  "activeOrders": [],
   "shippedOrders": [],
   "fxRate": "26000"
 }
