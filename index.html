@@ -725,8 +725,21 @@ function openPrefillQueue(queue,idx){
   document.getElementById('orderModal').classList.add('open');
 }
 
-function saveOrderAndNext(){captureInternalRefs();doSaveOrder();prefillIdx++;openPrefillQueue(prefillQueue,prefillIdx);}
-function saveOrderAndFinish(){captureInternalRefs();doSaveOrder();closeOrderModal();resetModalFooter();renderActiveOrders();saveToGithub();}
+function saveOrderAndNext(){
+  captureInternalRefs();
+  var saved=doSaveOrder();
+  captureChecklist(saved);
+  prefillIdx++;
+  openPrefillQueue(prefillQueue,prefillIdx);
+}
+function saveOrderAndFinish(){
+  captureInternalRefs();
+  doSaveOrder();
+  closeOrderModal();
+  resetModalFooter();
+  renderActiveOrders();
+  saveToGithub();
+}
 function captureInternalRefs(){lastInternalRefs={orderNo:g('o_orderNo'),reqNo:g('o_reqNo'),purchNo:g('o_purchNo')};}
 function doSaveOrder(){
   var data=buildOrderFromForm();
@@ -735,7 +748,19 @@ function doSaveOrder(){
     signBackDate:'',twxConfirmed:false,orderIssued:false,pcNotified:false,
     inspEmailDate:'',inspNoticeDate:'',twxShipDone:false,adjLog:[]
   },data);
+  // Apply carried-over checklist if this is not the first in queue
+  if(prefillIdx>0){
+    order.phase=lastChecklist.phase;
+    order.signBackDate=lastChecklist.signBackDate;
+    order.twxConfirmed=lastChecklist.twxConfirmed;
+    order.orderIssued=lastChecklist.orderIssued;
+    order.pcNotified=lastChecklist.pcNotified;
+    order.inspEmailDate=lastChecklist.inspEmailDate;
+    order.inspNoticeDate=lastChecklist.inspNoticeDate;
+    order.twxShipDone=lastChecklist.twxShipDone;
+  }
   state.activeOrders.push(order);
+  return order;
 }
 function resetModalFooter(){
   document.getElementById('orderModalFooter').innerHTML=
@@ -800,6 +825,7 @@ function parsePOExcel(e){
       var keys=Object.keys(groups);
       if(!keys.length){alert('No line items found.');return;}
       lastInternalRefs={orderNo:'',reqNo:'',purchNo:''};
+      lastChecklist={phase:1,signBackDate:'',twxConfirmed:false,orderIssued:false,pcNotified:false,inspEmailDate:'',inspNoticeDate:'',twxShipDone:false};
       var prefills=[];
       for(var ki=0;ki<keys.length;ki++){
         var g2=groups[keys[ki]],prod=findProduct(g2.custPN);
