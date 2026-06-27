@@ -62,7 +62,7 @@
       "id": "mqw0j300orv9w",
       "phase": 1,
       "signBackDate": "",
-      "twxConfirmed": false,
+      "twxConfirmed": true,
       "orderIssued": false,
       "pcNotified": false,
       "inspEmailDate": "",
