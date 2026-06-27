@@ -67,7 +67,7 @@
       "pcNotified": true,
       "inspEmailDate": "2025-12-04",
       "inspNoticeDate": "2026-01-15",
-      "twxShipDone": false,
+      "twxShipDone": true,
       "adjLog": [],
       "poBase": "PUO202505770",
       "orderDate": "2026-06-27",
