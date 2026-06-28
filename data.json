@@ -94,6 +94,21 @@
       "on": "CS302-2603030002",
       "rn": "CP018-2603030001",
       "pn": "PC813-2603030001"
+    },
+    "PUO202603912": {
+      "phase": 1,
+      "signBack": "",
+      "twx": false,
+      "issued": false,
+      "pcNotif": false,
+      "inspEmail": "",
+      "inspNotice": "",
+      "shipDone": false,
+      "inspDate": "2026-06-22",
+      "adjLog": [],
+      "on": "CS302-2605070002",
+      "rn": "CP018-2605070001",
+      "pn": "PC813-2605070001"
     }
   },
   "orders": [
@@ -156,6 +171,18 @@
       "qc": 1600,
       "fc": "2026-04-23",
       "price": 3.4
+    },
+    {
+      "id": "mqxjq9s4lmuau",
+      "po": "PUO202603912",
+      "od": "2026-06-28",
+      "cpn": "PWCARS18BK",
+      "ipn": "8ELC130001",
+      "qk": 640,
+      "qb": 640,
+      "qc": 1280,
+      "fc": "2026-08-14",
+      "price": 3.35
     }
   ]
 }
