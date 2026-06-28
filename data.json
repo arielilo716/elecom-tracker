@@ -81,9 +81,9 @@
       "pn": "PC813-2512020001"
     },
     "PUO202511403": {
-      "phase": 1,
+      "phase": 4,
       "signBack": "2025-12-23",
-      "twx": false,
+      "twx": true,
       "issued": false,
       "pcNotif": false,
       "inspEmail": "",
