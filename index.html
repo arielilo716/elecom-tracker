@@ -76,9 +76,9 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
 .fx label{font-weight:600;color:var(--muted);white-space:nowrap;}
 .fx input{width:110px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;}
 .fxn{font-size:11px;color:var(--muted);}
-.pb{line-height:1.9;display:inline-block;}
-.pr{display:flex;align-items:center;gap:6px;}
-.pr .ti{font-size:11px;color:var(--muted);width:58px;}.pr .pv{font-size:13px;font-weight:500;}
+.pb{line-height:1.4;display:inline-flex;flex-direction:column;gap:4px;}
+.pr{display:flex;align-items:center;justify-content:flex-start;gap:12px;}
+.pr .ti{font-size:11px;color:var(--muted);width:58px;text-align:left;}.pr .pv{font-size:13px;font-weight:500;text-align:left;}
 .vnd{font-size:13px;}.ue{font-size:11px;color:var(--pd);margin-top:2px;}
 .mono{font-family:'SF Mono','Fira Code',monospace;font-size:12px;}
 .g8{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
@@ -142,7 +142,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
       <div class="tw">
         <table>
           <thead><tr><th>客人料號</th><th>廠內料號</th><th>Product SKU</th><th>Description</th>
-          <th>Unit Price USD 500/1000</th><th>Production Cost VND</th><th>Status</th><th>Note</th><th></th></tr></thead>
+          <th>Unit Price USD 500/1000</th><th>Production Cost VND (≈ USD)</th><th>Status</th><th>Note</th><th></th></tr></thead>
           <tbody id="pBody"></tbody>
         </table>
       </div>
@@ -288,7 +288,7 @@ var pQueue=[], pIdx=0, lastRefs={on:'',rn:'',pn:''};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function fU(v){if(v===''||v==null)return '—';return '$'+Number(v).toFixed(2);}
-function fV(v){if(v===''||v==null)return '—';return Number(v).toLocaleString()+'d';}
+function fV(v){if(v===''||v==null)return '—';return Number(v).toLocaleString()+' ₫';}
 function v2u(v){var r=parseFloat(S.fxRate);if(!r||!v||v==='')return null;return(parseFloat(v)/r).toFixed(2);}
 function dUntil(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/86400000);}
 function wdSince(d){
@@ -339,6 +339,7 @@ function getAlerts(pd){
 
 function renderOrders(){
   var tb=document.getElementById('aBody');
+  if(!S.orders || !Array.isArray(S.orders)) { S.orders = []; }
   var ords=S.orders.slice().sort(function(a,b){if(!a.fc)return 1;if(!b.fc)return -1;return new Date(a.fc)-new Date(b.fc);});
   if(!ords.length){tb.innerHTML='<tr><td colspan="9"><div class="es">No active orders. Upload a PO Excel or add manually.</div></td></tr>';return;}
   var grps={},ord=[];
@@ -440,7 +441,7 @@ function buildDP(pb,pd,lines){
 
   return '<div class="dp">'+ph+'<div class="sl">Phase Checklist</div>'+cl+
     '<div class="sl" style="margin-top:16px">SKU Breakdown</div>'+skuT+
-    '<div class="sl">Refs + Inspection Date</div>'+refs+adj+acts+'</div>';
+    <div class="sl">Refs + Inspection Date</div>'+refs+adj+acts+'</div>';
 }
 
 function df2(l,v){return '<div class="df"><label>'+l+'</label><div class="v">'+(v||'—')+'</div></div>';}
@@ -657,7 +658,7 @@ function renderProds(){
       '<td style="color:var(--muted)">'+(p.desc||'—')+'</td>'+
       '<td><div class="pb"><div class="pr"><span class="ti">500 pcs</span><span class="pv">'+fU(p.p500)+'</span></div>'+
       '<div class="pr"><span class="ti">1000 pcs</span><span class="pv">'+fU(p.p1000)+'</span></div></div></td>'+
-      '<td><div class="vnd">'+fV(p.pc)+'</div>'+(u?'<div class="ue">approx $'+u+'</div>':'')+'</td>'+
+      '<td><div class="vnd">'+fV(p.pc)+'</div>'+(u?'<div class="ue">≈ $'+u+'</div>':'<div class="ue">≈ set rate above</div>')+'</td>'+
       '<td><span class="bdg '+(p.status==='Active'?'bac':'bdc')+'">'+p.status+'</span></td>'+
       '<td style="max-width:120px;white-space:normal;font-size:12px;color:var(--muted)">'+(p.note||'—')+'</td>'+
       '<td><div class="g8">'+
@@ -730,7 +731,9 @@ function loadGH(){
   .then(function(r){
     if(r.ok){return r.json().then(function(d){
       S=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-      if(!S.po)S.po={};renderProds();renderOrders();ghMsg('Loaded!','s');setSt(true);
+      if(!S.po)S.po={};
+      if(!S.orders || !Array.isArray(S.orders)) { S.orders = []; }
+      renderProds();renderOrders();ghMsg('Loaded!','s');setSt(true);
     });}else ghMsg('No data file yet.','i');
   }).catch(function(){ghMsg('Failed.','e');});
 }
@@ -738,7 +741,7 @@ function setSt(ok){var e=document.getElementById('syncSt');e.textContent=ok?'●
 function flash(){var e=document.getElementById('syncSt');e.textContent='Saving...';setTimeout(function(){e.textContent='● Synced';e.className='sync ok';},1200);}
 function ghMsg(m,t){var e=document.getElementById('ghMsg');if(!e)return;e.textContent=m;e.style.color=t==='e'?'var(--red)':t==='s'?'var(--green)':'var(--pd)';}
 function expJ(){var b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='elecom-'+new Date().toISOString().slice(0,10)+'.json';a.click();}
-function impJ(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{S=JSON.parse(ev.target.result);if(!S.po)S.po={};renderProds();renderOrders();alert('Imported.');}catch(err){alert('Invalid JSON.');}};r.readAsText(f);e.target.value='';}
+function impJ(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{S=JSON.parse(ev.target.result);if(!S.po)S.po={};if(!S.orders || !Array.isArray(S.orders)) { S.orders = []; }renderProds();renderOrders();alert('Imported.');}catch(err){alert('Invalid JSON.');}};r.readAsText(f);e.target.value='';}
 
 (function(){
   var g=JSON.parse(localStorage.getItem('ghc')||'{}');
@@ -746,7 +749,7 @@ function impJ(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.o
     GH=g;setSt(true);
     fetch('https://api.github.com/repos/'+GH.user+'/'+GH.repo+'/contents/data.json',{headers:{Authorization:'token '+GH.token}})
     .then(function(r){return r.ok?r.json():null;})
-    .then(function(d){if(d){S=JSON.parse(decodeURIComponent(escape(atob(d.content))));if(!S.po)S.po={};setSt(true);}renderProds();renderOrders();})
+    .then(function(d){if(d){S=JSON.parse(decodeURIComponent(escape(atob(d.content))));if(!S.po)S.po={};if(!S.orders || !Array.isArray(S.orders)) { S.orders = []; }setSt(true);}renderProds();renderOrders();})
     .catch(function(){setSt(false);renderProds();renderOrders();});
   }else{renderProds();renderOrders();}
 })();
