@@ -79,6 +79,21 @@
       "on": "CS302-2512020003",
       "rn": "CP018-2512020002",
       "pn": "PC813-2512020001"
+    },
+    "PUO202511403": {
+      "phase": 1,
+      "signBack": "",
+      "twx": false,
+      "issued": false,
+      "pcNotif": false,
+      "inspEmail": "",
+      "inspNotice": "",
+      "shipDone": false,
+      "inspDate": "2026-04-15",
+      "adjLog": [],
+      "on": "CS302-2603030002",
+      "rn": "CP018-2603030001",
+      "pn": "PC813-2603030001"
     }
   },
   "orders": [
@@ -117,6 +132,30 @@
       "qc": 1428,
       "fc": "2026-01-23",
       "price": 4.55
+    },
+    {
+      "id": "mqxjicq85xob5",
+      "po": "PUO202511403",
+      "od": "2026-06-28",
+      "cpn": "P-CARS18BK",
+      "ipn": "8ELB040001",
+      "qk": 840,
+      "qb": 780,
+      "qc": 1620,
+      "fc": "2026-04-23",
+      "price": 3.35
+    },
+    {
+      "id": "mqxjifoqssyps",
+      "po": "PUO202511403",
+      "od": "2026-06-28",
+      "cpn": "PWCARS18BK",
+      "ipn": "8ELC130001",
+      "qk": 832,
+      "qb": 768,
+      "qc": 1600,
+      "fc": "2026-04-23",
+      "price": 3.4
     }
   ]
 }
