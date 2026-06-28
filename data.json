@@ -96,9 +96,9 @@
       "pn": "PC813-2603030001"
     },
     "PUO202603912": {
-      "phase": 1,
+      "phase": 4,
       "signBack": "",
-      "twx": false,
+      "twx": true,
       "issued": false,
       "pcNotif": false,
       "inspEmail": "",
