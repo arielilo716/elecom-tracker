@@ -68,7 +68,7 @@
     "PUO202505770": {
       "phase": 1,
       "signBack": "2025-12-05",
-      "twx": false,
+      "twx": true,
       "issued": false,
       "pcNotif": false,
       "inspEmail": "",
