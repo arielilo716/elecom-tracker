@@ -73,7 +73,7 @@
       "pcNotif": true,
       "inspEmail": "",
       "inspNotice": "2026-01-15",
-      "shipDone": false,
+      "shipDone": true,
       "inspDate": "2026-01-16",
       "adjLog": [],
       "on": "CS302-2512020003",
