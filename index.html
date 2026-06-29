@@ -325,7 +325,7 @@ function switchTab(n){
 }
 
 function pbadge(p){
-  var c={1:'b1',2:'b2',3:'b3',4:'b4'}, l={1:'Intake',2:'Production',3:'Inspection',4:'Ready'};
+  var c={1:'b1',2:'b2',3:'b3',4:'b4'},l={1:'Intake',2:'Production',3:'Inspection',4:'Ready'};
   return '<span class="bdg '+(c[p]||'b1')+'">'+(l[p]||'Intake')+'</span>';
 }
 
@@ -460,7 +460,6 @@ function setPF(pb,f,v){getPO(pb)[f]=v;saveGit();renderOrders();}
 function clrPF(pb,f,el){if(!el.checked){getPO(pb)[f]='';saveGit();renderOrders();}}
 function setPhase(pb,p){getPO(pb).phase=p;saveGit();renderOrders();}
 
-// ORDER MODAL
 function aFill(){var pr=fProd(document.getElementById('o_cpn').value.trim());if(pr){document.getElementById('o_ipn').value=pr.iPN||'';calcT();}}
 function calcT(){
   var k=parseInt(document.getElementById('o_qk').value)||0,b=parseInt(document.getElementById('o_qb').value)||0,c=k+b;
@@ -523,14 +522,12 @@ function resetFoot(){
     '<button class="btn bp" onclick="saveO()">Save Order</button>';
 }
 
-// PREFILL QUEUE
 function capRefs(){lastRefs={on:gv('o_on'),rn:gv('o_rn'),pn:gv('o_pn')};}
 function doSave(){
   var d=bldOF();
   var pd=getPO(d.po);
   if(d.inspDate)pd.inspDate=d.inspDate;if(d.on)pd.on=d.on;if(d.rn)pd.rn=d.rn;if(d.pn)pd.pn=d.pn;
-  var o={id:uid(),po:d.po,od:d.od,cpn:d.cpn,ipn:d.ipn,qk:d.qk,qb:d.qb,qc:d.qc,fc:d.fc,price:d.price};
-  S.orders.push(o);
+  S.orders.push({id:uid(),po:d.po,od:d.od,cpn:d.cpn,ipn:d.ipn,qk:d.qk,qb:d.qb,qc:d.qc,fc:d.fc,price:d.price});
 }
 function sNext(){capRefs();doSave();pIdx++;openQ(pQueue,pIdx);}
 function sFin(){capRefs();doSave();closeOM();resetFoot();renderOrders();saveGit();}
@@ -558,7 +555,6 @@ function openQ(q,idx){
   document.getElementById('omModal').classList.add('op');
 }
 
-// EXCEL PARSER
 function parsePO(e){
   var file=e.target.files[0];if(!file)return;
   var reader=new FileReader();
@@ -612,8 +608,8 @@ function parsePO(e){
         pfs.push({po:g2.pb,cpn:g2.cpn,ipn:pr?pr.iPN:'',qk:g2.qk,qb:g2.qb,qc:comb,
           fc:g2.fc,inspDate:g2.id,price:price,od:new Date().toISOString().slice(0,10),on:'',rn:'',pn:''});
       }
-      // Share inspection date across all SKUs
-      var sid='';for(var fi=0;fi<pfs.length;fi++)if(pfs[fi].inspDate){sid=pfs[fi].inspDate;break;}
+      var sid='';
+      for(var fi=0;fi<pfs.length;fi++)if(pfs[fi].inspDate){sid=pfs[fi].inspDate;break;}
       if(sid)for(var fi2=0;fi2<pfs.length;fi2++)pfs[fi2].inspDate=sid;
       openQ(pfs,0);
     }catch(err){alert('Error: '+err.message);}
@@ -622,7 +618,6 @@ function parsePO(e){
   e.target.value='';
 }
 
-// ADJ
 function openAdj(pb){
   adjPO=pb;
   ['a_dr','a_nf','a_nt'].forEach(function(i){document.getElementById(i).value='';});
@@ -640,7 +635,6 @@ function saveAdj(){
   pd.adjLog.push(en);closeAdj();renderOrders();saveGit();
 }
 
-// PRODUCT MASTER
 function onFx(){S.fxRate=document.getElementById('fxRate').value;renderProds();saveGit();}
 function updUSD(){var u=v2u(document.getElementById('f_pc').value);document.getElementById('f_pu').value=u?'$'+u:'—';}
 function renderProds(){
@@ -654,10 +648,12 @@ function renderProds(){
       '<td><span class="mono">'+p.custPN+'</span></td>'+
       '<td><span class="mono">'+p.iPN+'</span></td>'+
       '<td><span class="mono">'+(p.sku||'—')+'</span></td>'+
-      '<td style="color:var(--muted)">'+(p.desc||'—')+'</td>'+
-      '<td><div class="pb"><div class="pr"><span class="ti">500 pcs</span><span class="pv">'+fU(p.p500)+'</span></div>'+
-      '<div class="pr"><span class="ti">1000 pcs</span><span class="pv">'+fU(p.p1000)+'</span></div></div></td>'+
-      '<td><div class="vnd">'+fV(p.pc)+'</div>'+(u?'<div class="ue">≈ $'+u+'</div>':'<div class="ue">≈ set rate above</div>')+'</td>'+
+      '<td style="color:var(--muted);white-space:normal">'+(p.desc||'—')+'</td>'+
+      '<td><div class="pb">'+
+        '<div class="pr"><span class="ti">500 pcs</span><span class="pv">'+fU(p.p500)+'</span></div>'+
+        '<div class="pr"><span class="ti">1000 pcs</span><span class="pv">'+fU(p.p1000)+'</span></div>'+
+      '</div></td>'+
+      '<td><div class="vnd">'+fV(p.pc)+'</div>'+(u?'<div class="ue">≈ $'+u+'</div>':'')+'</td>'+
       '<td><span class="bdg '+(p.status==='Active'?'bac':'bdc')+'">'+p.status+'</span></td>'+
       '<td style="max-width:120px;white-space:normal;font-size:12px;color:var(--muted)">'+(p.note||'—')+'</td>'+
       '<td><div class="g8">'+
@@ -693,45 +689,55 @@ function saveP(){
 }
 function delP(id){if(!confirm('Delete?'))return;S.products=S.products.filter(function(x){return x.id!==id;});renderProds();saveGit();}
 
-// GITHUB
 function openSettings(){
   var g=JSON.parse(localStorage.getItem('ghc')||'{}');
-  document.getElementById('c_u').value=g.user||'';document.getElementById('c_r').value=g.repo||'elecom-tracker';document.getElementById('c_t').value=g.token||'';
+  document.getElementById('c_u').value=g.user||'';
+  document.getElementById('c_r').value=g.repo||'elecom-tracker';
+  document.getElementById('c_t').value=g.token||'';
   document.getElementById('setModal').classList.add('op');
 }
 function closeSet(){document.getElementById('setModal').classList.remove('op');}
 function saveGH(){
-  GH.user=document.getElementById('c_u').value.trim();GH.repo=document.getElementById('c_r').value.trim();GH.token=document.getElementById('c_t').value.trim();
+  GH.user=document.getElementById('c_u').value.trim();
+  GH.repo=document.getElementById('c_r').value.trim();
+  GH.token=document.getElementById('c_t').value.trim();
   if(!GH.user||!GH.repo||!GH.token){ghMsg('Fill in all fields.','e');return;}
   localStorage.setItem('ghc',JSON.stringify(GH));testGH();
 }
 function testGH(){
   ghMsg('Testing...','i');
   fetch('https://api.github.com/repos/'+GH.user+'/'+GH.repo,{headers:{Authorization:'token '+GH.token}})
-  .then(function(r){if(r.ok){ghMsg('Connected!','s');setSt(true);}else{r.json().then(function(e){ghMsg('Error: '+e.message,'e');});setSt(false);}})
-  .catch(function(){ghMsg('Network error.','e');});
+  .then(function(r){
+    if(r.ok){ghMsg('Connected!','s');setSt(true);}
+    else{r.json().then(function(e){ghMsg('Error: '+e.message,'e');});setSt(false);}
+  }).catch(function(){ghMsg('Network error.','e');});
 }
 function saveGit(){
-  var g=JSON.parse(localStorage.getItem('ghc')||'{}');if(!g.token||!g.user||!g.repo)return;
-  GH=g;var cont=btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
+  var g=JSON.parse(localStorage.getItem('ghc')||'{}');
+  if(!g.token||!g.user||!g.repo)return;
+  GH=g;
+  var cont=btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
   fetch('https://api.github.com/repos/'+GH.user+'/'+GH.repo+'/contents/data.json',{headers:{Authorization:'token '+GH.token}})
   .then(function(r){return r.ok?r.json():null;})
   .then(function(d){
     var body={message:'Update',content:cont};if(d)body.sha=d.sha;
     return fetch('https://api.github.com/repos/'+GH.user+'/'+GH.repo+'/contents/data.json',{
-      method:'PUT',headers:{Authorization:'token '+GH.token,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  }).then(function(r){if(r&&r.ok){setSt(true);flash();}else setSt(false);})
+      method:'PUT',headers:{Authorization:'token '+GH.token,'Content-Type':'application/json'},
+      body:JSON.stringify(body)});
+  })
+  .then(function(r){if(r&&r.ok){setSt(true);flash();}else setSt(false);})
   .catch(function(){setSt(false);});
 }
 function loadGH(){
-  var g=JSON.parse(localStorage.getItem('ghc')||'{}');if(!g.token){ghMsg('Save config first.','e');return;}
+  var g=JSON.parse(localStorage.getItem('ghc')||'{}');
+  if(!g.token){ghMsg('Save config first.','e');return;}
   GH=g;ghMsg('Loading...','i');
   fetch('https://api.github.com/repos/'+GH.user+'/'+GH.repo+'/contents/data.json',{headers:{Authorization:'token '+GH.token}})
   .then(function(r){
     if(r.ok){return r.json().then(function(d){
       S=JSON.parse(decodeURIComponent(escape(atob(d.content))));
       if(!S.po)S.po={};
-      if(!S.orders||!Array.isArray(S.orders)){S.orders=[];}
+      if(!S.orders||!Array.isArray(S.orders))S.orders=[];
       renderProds();renderOrders();ghMsg('Loaded!','s');setSt(true);
     });}else ghMsg('No data file yet.','i');
   }).catch(function(){ghMsg('Failed.','e');});
@@ -739,8 +745,24 @@ function loadGH(){
 function setSt(ok){var e=document.getElementById('syncSt');e.textContent=ok?'● Synced':'● Sync error';e.className='sync '+(ok?'ok':'err');}
 function flash(){var e=document.getElementById('syncSt');e.textContent='Saving...';setTimeout(function(){e.textContent='● Synced';e.className='sync ok';},1200);}
 function ghMsg(m,t){var e=document.getElementById('ghMsg');if(!e)return;e.textContent=m;e.style.color=t==='e'?'var(--red)':t==='s'?'var(--green)':'var(--pd)';}
-function expJ(){var b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='elecom-'+new Date().toISOString().slice(0,10)+'.json';a.click();}
-function impJ(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{S=JSON.parse(ev.target.result);if(!S.po)S.po={};if(!S.orders||!Array.isArray(S.orders)){S.orders=[];}renderProds();renderOrders();alert('Imported.');}catch(err){alert('Invalid JSON.');}};r.readAsText(f);e.target.value='';}
+function expJ(){
+  var b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='elecom-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function impJ(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      S=JSON.parse(ev.target.result);
+      if(!S.po)S.po={};
+      if(!S.orders||!Array.isArray(S.orders))S.orders=[];
+      renderProds();renderOrders();alert('Imported.');
+    }catch(err){alert('Invalid JSON.');}
+  };
+  r.readAsText(f);e.target.value='';
+}
 
 (function(){
   var g=JSON.parse(localStorage.getItem('ghc')||'{}');
@@ -752,7 +774,7 @@ function impJ(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.o
       if(d){
         S=JSON.parse(decodeURIComponent(escape(atob(d.content))));
         if(!S.po)S.po={};
-        if(!S.orders||!Array.isArray(S.orders)){S.orders=[];}
+        if(!S.orders||!Array.isArray(S.orders))S.orders=[];
         setSt(true);
       }
       renderProds();renderOrders();
