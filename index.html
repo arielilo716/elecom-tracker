@@ -1033,7 +1033,7 @@ function parseTWXText(text,pb){
       var l=arr[i];
       var m=l.match(/^([^:]+?):\s*(.+)$/);
       if(m){r[m[1].trim().toLowerCase()]=m[2].trim();continue;}
-      var m2=l.match(/^(inv\s*no)\s+(.+)$/i);
+      var m2=l.match(/^(inv\s*no)\s+(\S.*)$/i);
       if(m2){r['inv no']=m2[2].trim();}
     }
     return r;
@@ -1042,9 +1042,11 @@ function parseTWXText(text,pb){
     var m=s&&s.match(/^(\d{1,2})\/(\d{1,2})$/);
     if(!m)return s||'';
     var mo=parseInt(m[1]),dy=parseInt(m[2]),now=new Date(),yr=now.getFullYear();
-    var d=new Date(yr,mo-1,dy);
-    if(d-now>60*24*3600*1000)d=new Date(yr-1,mo-1,dy);
-    return d.toISOString().slice(0,10);
+    var pad=function(n){return String(n).padStart(2,'0');};
+    var ds=yr+'-'+pad(mo)+'-'+pad(dy);
+    var d=new Date(ds);
+    if(d-now>60*24*3600*1000)ds=(yr-1)+'-'+pad(mo)+'-'+pad(dy);
+    return ds;
   }
   function fillPort(suf){
     var arr=sections[suf];if(!arr)return;
