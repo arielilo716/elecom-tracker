@@ -161,16 +161,28 @@
   ],
   "shipment": {
     "PUO202505770": {
-      "exw": "",
-      "etdk": "",
-      "etdb": "",
-      "etak": "",
-      "etab": "",
+      "exw": "2026-01-23",
+      "etdk": "2026-01-28",
+      "etdb": "2026-01-28",
+      "etak": "2026-01-31",
+      "etab": "2026-01-31",
       "inv": "",
       "amt": "",
       "pd": "",
       "pamt": "",
-      "note": ""
+      "note": "",
+      "invNoK": "CS552-2601150004",
+      "blK": "M10361310",
+      "containerK": "WHSU5417945",
+      "brokerK": "Mitsui Soko",
+      "shipModeK": "Sea",
+      "delivModeK": "Consolidation",
+      "invNoB": "CS552-2601150005",
+      "blB": "M10361304",
+      "containerB": "WHSU5607586",
+      "brokerB": "Mitsui Soko",
+      "shipModeB": "Sea",
+      "delivModeB": "Consolidation"
     }
   },
   "shipped": [
