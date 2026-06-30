@@ -135,7 +135,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
     <div class="card">
       <div class="ch">
         <h2>Shipped &amp; Payment Tracking</h2>
-        <span style="font-size:12px;color:var(--muted)">Payment Term: TT 90 days from invoice date</span>
+        <span style="font-size:12px;color:var(--muted)">Payment Term: TT 90 days from end of invoice month</span>
       </div>
       <div class="tw">
         <table>
@@ -337,7 +337,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
         <div class="fgp"><label>運輸報關行 Broker</label><input id="sh_brokerB"></div>
         <div class="fgp"><label>出貨方式 Ship Mode</label><input id="sh_shipModeB"></div>
         <div class="fgp"><label>Deliv Mode</label><input id="sh_delivModeB"></div>
-        <div class="fd">Invoice &amp; Payment (TT 90 days)</div>
+        <div class="fd">Invoice &amp; Payment (TT 90 days from end of invoice month)</div>
         <div class="fgp"><label>Invoice Date</label><input id="sh_inv" type="date" oninput="calcPDue()"></div>
         <div class="fgp ro"><label>Payment Due Date (auto)</label><input id="sh_pdue" readonly></div>
         <div class="fgp"><label>Invoice Amount USD (override)</label><input id="sh_amt" type="number" step="0.01" placeholder="leave blank to use order total"></div>
@@ -424,7 +424,13 @@ function addDays(dateStr,n){
   if(!dateStr)return '';
   var d=new Date(dateStr);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);
 }
-function payDue(sm){return addDays(sm.inv,90);}
+function eom(dateStr){
+  if(!dateStr)return '';
+  var d=new Date(dateStr),pad=function(n){return String(n).padStart(2,'0');};
+  var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(last);
+}
+function payDue(sm){return addDays(eom(sm.inv),90);}
 function payStatus(sm){
   var due=payDue(sm);
   if(sm.pd)return 'paid';
@@ -1050,7 +1056,7 @@ function openShModal(pb){
 function closeSh(){document.getElementById('shModal').classList.remove('op');shPO=null;document.getElementById('twxUp').value='';}
 function calcPDue(){
   var inv=document.getElementById('sh_inv').value;
-  document.getElementById('sh_pdue').value=inv?addDays(inv,90):'';
+  document.getElementById('sh_pdue').value=inv?addDays(eom(inv),90):'';
 }
 function autoEtaK(){var v=document.getElementById('sh_etdk').value;if(v)document.getElementById('sh_etak').value=addDays(v,3);}
 function autoEtaB(){var v=document.getElementById('sh_etdb').value;if(v)document.getElementById('sh_etab').value=addDays(v,3);}
