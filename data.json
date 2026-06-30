@@ -157,35 +157,7 @@
       "qc": 1280,
       "fc": "2026-06-24",
       "price": 3.35
-    }
-  ],
-  "shipment": {
-    "PUO202505770": {
-      "exw": "2026-01-23",
-      "etdk": "2026-01-29",
-      "etdb": "2026-01-29",
-      "etak": "2026-02-01",
-      "etab": "2026-02-01",
-      "inv": "2026-01-23",
-      "amt": "",
-      "pd": "2026-04-30",
-      "pamt": "20608",
-      "note": "",
-      "invNoK": "CS552-2601150004",
-      "blK": "M10361310",
-      "containerK": "WHSU5417945",
-      "brokerK": "Mitsui Soko",
-      "shipModeK": "Sea",
-      "delivModeK": "Consolidation",
-      "invNoB": "CS552-2601150005",
-      "blB": "M10361304",
-      "containerB": "WHSU5607586",
-      "brokerB": "Mitsui Soko",
-      "shipModeB": "Sea",
-      "delivModeB": "Consolidation"
-    }
-  },
-  "shipped": [
+    },
     {
       "id": "mqxj5irm7gtns",
       "po": "PUO202505770",
@@ -222,5 +194,32 @@
       "fc": "2026-01-23",
       "price": 4.55
     }
-  ]
+  ],
+  "shipment": {
+    "PUO202505770": {
+      "exw": "2026-01-23",
+      "etdk": "2026-01-29",
+      "etdb": "2026-01-29",
+      "etak": "2026-02-01",
+      "etab": "2026-02-01",
+      "inv": "2026-01-23",
+      "amt": "",
+      "pd": "2026-04-30",
+      "pamt": "20608",
+      "note": "",
+      "invNoK": "CS552-2601150004",
+      "blK": "M10361310",
+      "containerK": "WHSU5417945",
+      "brokerK": "Mitsui Soko",
+      "shipModeK": "Sea",
+      "delivModeK": "Consolidation",
+      "invNoB": "CS552-2601150005",
+      "blB": "M10361304",
+      "containerB": "WHSU5607586",
+      "brokerB": "Mitsui Soko",
+      "shipModeB": "Sea",
+      "delivModeB": "Consolidation"
+    }
+  },
+  "shipped": []
 }
