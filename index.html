@@ -171,7 +171,25 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
       </div>
     </div>
   </div>
-  <div id="tab-dev" class="h"><div class="ph"><h3>In Development — Coming Later</h3></div></div>
+  <div id="tab-dev" class="h">
+    <div class="card">
+      <div class="ch">
+        <h2>In Development</h2>
+        <button class="btn bp sm" onclick="openDev()">+ Add Item</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr>
+            <th>Working P/N</th><th>Description</th>
+            <th>Internal Stage</th><th>Customer Stage</th>
+            <th>BOM Price</th><th>Target Price</th>
+            <th>Next Action</th><th>Alerts</th><th></th>
+          </tr></thead>
+          <tbody id="devBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ORDER MODAL -->
@@ -257,6 +275,47 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
     <div class="mf">
       <button class="btn bs" onclick="closePM()">Cancel</button>
       <button class="btn bp" onclick="saveP()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEV ITEM MODAL -->
+<div class="mb" id="devModal">
+  <div class="mo" style="max-width:660px">
+    <div class="mh"><h3 id="devTitle">New Development Item</h3><button class="xb" onclick="closeDev()">&#215;</button></div>
+    <div class="mbd">
+      <div class="fg">
+        <div class="fd">Identification</div>
+        <div class="fgp"><label>Working P/N *</label><input id="dv_wpn" placeholder="e.g. WIP-001"></div>
+        <div class="fgp full"><label>Description</label><input id="dv_desc"></div>
+        <div class="fd">Pricing</div>
+        <div class="fgp"><label>BOM Price VND</label><input id="dv_bom" type="number" step="1" oninput="dvUpdUSD()"></div>
+        <div class="fgp ro"><label>BOM ≈ USD</label><input id="dv_bomu" readonly></div>
+        <div class="fgp"><label>Target Unit Price USD</label><input id="dv_tgt" type="number" step="0.01" placeholder="0.00"></div>
+        <div class="fd">Stage</div>
+        <div class="fgp"><label>Internal Dev Stage</label>
+          <select id="dv_ist">
+            <option>Concept</option><option>Design</option><option>Tooling</option><option>Sampling</option><option>Ready</option>
+          </select>
+        </div>
+        <div class="fgp"><label>Customer Stage</label>
+          <select id="dv_cst">
+            <option>Proposed</option><option>Sample Sent</option><option>Under Review</option><option>Approved</option><option>Rejected</option><option>On Hold</option>
+          </select>
+        </div>
+        <div class="fd">Timeline</div>
+        <div class="fgp"><label>Date Proposed</label><input id="dv_dp" type="date"></div>
+        <div class="fgp"><label>Sample Sent Date</label><input id="dv_ss" type="date"></div>
+        <div class="fd">Follow-up</div>
+        <div class="fgp full"><label>Customer Feedback</label><textarea id="dv_fb" rows="2"></textarea></div>
+        <div class="fgp"><label>Next Action</label><input id="dv_na" placeholder="e.g. Chase for feedback"></div>
+        <div class="fgp"><label>Next Action Due</label><input id="dv_nd" type="date"></div>
+        <div class="fgp full"><label>Notes</label><textarea id="dv_nt" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bs" onclick="closeDev()">Cancel</button>
+      <button class="btn bp" onclick="saveDev()">Save</button>
     </div>
   </div>
 </div>
@@ -385,7 +444,8 @@ var S = {
   orders:[],
   shipped:[],
   po:{},
-  shipment:{}
+  shipment:{},
+  dev:[]
 };
 var GH={user:'',repo:'',token:''};
 var editOId=null, editPId=null, adjPO=null, expPO=null;
@@ -458,6 +518,7 @@ function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',ns[i]===n);});
   ns.forEach(function(x){var e=document.getElementById('tab-'+x);if(e)e.classList.toggle('h',x!==n);});
   if(n==='shipped')renderShipped();
+  if(n==='dev')renderDev();
 }
 
 function pbadge(p){
@@ -878,7 +939,8 @@ function loadGH(){
       if(!S.po)S.po={};if(!S.shipment)S.shipment={};
       if(!S.orders||!Array.isArray(S.orders))S.orders=[];
       if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
-      renderProds();renderOrders();renderShipped();ghMsg('Loaded!','s');setSt(true);
+      if(!S.dev||!Array.isArray(S.dev))S.dev=[];
+      renderProds();renderOrders();renderShipped();renderDev();ghMsg('Loaded!','s');setSt(true);
     });}else ghMsg('No data file yet.','i');
   }).catch(function(){ghMsg('Failed.','e');});
 }
@@ -899,11 +961,107 @@ function impJ(e){
       if(!S.po)S.po={};if(!S.shipment)S.shipment={};
       if(!S.orders||!Array.isArray(S.orders))S.orders=[];
       if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
-      renderProds();renderOrders();renderShipped();alert('Imported.');
+      if(!S.dev||!Array.isArray(S.dev))S.dev=[];
+      renderProds();renderOrders();renderShipped();renderDev();alert('Imported.');
     }catch(err){alert('Invalid JSON.');}
   };
   r.readAsText(f);e.target.value='';
 }
+
+var devIST={Concept:'b1',Design:'b2',Tooling:'b3',Sampling:'b4',Ready:'bac'};
+var devCST={Proposed:'bpn','Sample Sent':'b2','Under Review':'b3',Approved:'bac',Rejected:'bov','On Hold':'bdc'};
+function devBadge(v,map){return '<span class="bdg '+(map[v]||'b1')+'">'+v+'</span>';}
+var editDevId=null,expDev=null;
+
+function renderDev(){
+  var tb=document.getElementById('devBody');if(!tb)return;
+  if(!S.dev||!S.dev.length){tb.innerHTML='<tr><td colspan="9"><div class="es">No items yet. Add a product you\'re pitching to the customer.</div></td></tr>';return;}
+  var items=S.dev.slice().reverse();
+  var html='';
+  for(var i=0;i<items.length;i++){
+    var d=items[i],isE=expDev===d.id;
+    var alert='';
+    if(d.nd){
+      var diff=Math.ceil((new Date(d.nd)-new Date())/86400000);
+      if(diff<0)alert='<span class="fr">'+Math.abs(diff)+'d overdue</span>';
+      else if(diff<=7)alert='<span class="fy">Due in '+diff+'d</span>';
+    }
+    var u=v2u(d.bom);
+    html+='<tr class="or" onclick="togDevD(\''+d.id+'\')">'+
+      '<td><span class="mono">'+(d.wpn||'—')+'</span></td>'+
+      '<td style="max-width:180px;white-space:normal;font-size:12px;color:var(--muted)">'+(d.desc||'—')+'</td>'+
+      '<td>'+devBadge(d.ist||'Concept',devIST)+'</td>'+
+      '<td>'+devBadge(d.cst||'Proposed',devCST)+'</td>'+
+      '<td><div style="font-size:12px">'+(d.bom?Number(d.bom).toLocaleString()+' ₫':'—')+'</div>'+(u?'<div class="ue">≈ $'+u+'</div>':'')+'</td>'+
+      '<td>'+(d.tgt?'$'+Number(d.tgt).toFixed(2):'—')+'</td>'+
+      '<td style="font-size:12px;max-width:140px;white-space:normal">'+(d.na||'—')+(d.nd?'<br><span style="color:var(--muted)">'+d.nd+'</span>':'')+'</td>'+
+      '<td>'+(alert||'—')+'</td>'+
+      '<td onclick="event.stopPropagation()"><div class="g8">'+
+        '<button class="btn bs xs" onclick="openDev(\''+d.id+'\')">Edit</button>'+
+        '<button class="btn bd xs" onclick="delDev(\''+d.id+'\')">Del</button>'+
+      '</div></td>'+
+    '</tr>';
+    html+='<tr class="dr'+(isE?'':' h')+'" id="devdr-'+d.id+'"><td colspan="9">'+buildDevDP(d)+'</td></tr>';
+  }
+  tb.innerHTML=html;
+}
+
+function togDevD(id){expDev=expDev===id?null:id;renderDev();}
+
+function buildDevDP(d){
+  var u=v2u(d.bom);
+  return '<div class="dp">'+
+    '<div class="dg">'+
+      df2('Working P/N',d.wpn||'—')+
+      df2('Description',d.desc||'—')+
+      df2('Internal Stage',devBadge(d.ist||'Concept',devIST))+
+      df2('Customer Stage',devBadge(d.cst||'Proposed',devCST))+
+      df2('BOM Price',(d.bom?Number(d.bom).toLocaleString()+' ₫':'—')+(u?' (≈ $'+u+')':''))+
+      df2('Target Price',d.tgt?'$'+Number(d.tgt).toFixed(2):'—')+
+      df2('Date Proposed',d.dp||'—')+
+      df2('Sample Sent',d.ss||'—')+
+    '</div>'+
+    (d.fb?'<div class="sl" style="margin-top:12px">Customer Feedback</div><div style="font-size:13px;color:var(--muted);white-space:pre-wrap">'+d.fb+'</div>':'') +
+    (d.na||d.nd?'<div class="sl" style="margin-top:12px">Next Action</div><div class="dg">'+df2('Action',d.na||'—')+df2('Due',d.nd||'—')+'</div>':'')+
+    (d.note?'<div class="sl" style="margin-top:12px">Notes</div><div style="font-size:13px;color:var(--muted);white-space:pre-wrap">'+d.note+'</div>':'')+
+  '</div>';
+}
+
+function dvUpdUSD(){var u=v2u(document.getElementById('dv_bom').value);document.getElementById('dv_bomu').value=u?'$'+u:'';}
+function openDev(id){
+  editDevId=id||null;
+  document.getElementById('devTitle').textContent=id?'Edit Item':'New Development Item';
+  var d={};
+  if(id){for(var i=0;i<S.dev.length;i++){if(S.dev[i].id===id){d=S.dev[i];break;}}}
+  var sv=function(eid,v){var e=document.getElementById(eid);if(e)e.value=v||'';};
+  sv('dv_wpn',d.wpn);sv('dv_desc',d.desc);sv('dv_bom',d.bom);sv('dv_tgt',d.tgt);
+  sv('dv_ist',d.ist||'Concept');sv('dv_cst',d.cst||'Proposed');
+  sv('dv_dp',d.dp);sv('dv_ss',d.ss);sv('dv_fb',d.fb);sv('dv_na',d.na);sv('dv_nd',d.nd);sv('dv_nt',d.note);
+  dvUpdUSD();
+  document.getElementById('devModal').classList.add('op');
+}
+function closeDev(){document.getElementById('devModal').classList.remove('op');editDevId=null;}
+function saveDev(){
+  var wpn=document.getElementById('dv_wpn').value.trim();
+  if(!wpn){alert('Working P/N is required.');return;}
+  var d={id:editDevId||uid(),wpn:wpn,
+    desc:document.getElementById('dv_desc').value.trim(),
+    bom:document.getElementById('dv_bom').value,
+    tgt:document.getElementById('dv_tgt').value,
+    ist:document.getElementById('dv_ist').value,
+    cst:document.getElementById('dv_cst').value,
+    dp:document.getElementById('dv_dp').value,
+    ss:document.getElementById('dv_ss').value,
+    fb:document.getElementById('dv_fb').value.trim(),
+    na:document.getElementById('dv_na').value.trim(),
+    nd:document.getElementById('dv_nd').value,
+    note:document.getElementById('dv_nt').value.trim()
+  };
+  if(editDevId){for(var i=0;i<S.dev.length;i++){if(S.dev[i].id===editDevId){S.dev[i]=d;break;}}}
+  else S.dev.push(d);
+  closeDev();renderDev();saveGit();
+}
+function delDev(id){if(!confirm('Delete?'))return;S.dev=S.dev.filter(function(x){return x.id!==id;});renderDev();saveGit();}
 
 var skuPO=null;
 function openSkuModal(pb){
@@ -1194,9 +1352,10 @@ function parseTWXText(text,pb){
         if(!S.po)S.po={};if(!S.shipment)S.shipment={};
         if(!S.orders||!Array.isArray(S.orders))S.orders=[];
         if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
+        if(!S.dev||!Array.isArray(S.dev))S.dev=[];
         setSt(true);
       }
-      renderProds();renderOrders();renderShipped();
+      renderProds();renderOrders();renderShipped();renderDev();
     })
     .catch(function(){setSt(false);renderProds();renderOrders();});
   }else{renderProds();renderOrders();}
