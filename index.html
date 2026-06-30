@@ -107,6 +107,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
   <div class="tab" onclick="switchTab('shipped')">Shipped &amp; Payment</div>
   <div class="tab" onclick="switchTab('products')">Product Master</div>
   <div class="tab" onclick="switchTab('dev')">In Development</div>
+  <div class="tab" onclick="switchTab('contacts')">Contacts</div>
 </div>
 <div class="main">
   <div id="tab-active">
@@ -188,6 +189,15 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
           <tbody id="devBody"></tbody>
         </table>
       </div>
+    </div>
+  </div>
+  <div id="tab-contacts" class="h">
+    <div class="card">
+      <div class="ch">
+        <h2>Contacts — ELECOM CO., LTD.</h2>
+        <button class="btn bp sm" onclick="openCt()">+ Add Contact</button>
+      </div>
+      <div id="ctList" style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
     </div>
   </div>
 </div>
@@ -320,6 +330,30 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
   </div>
 </div>
 
+<!-- CONTACT MODAL -->
+<div class="mb" id="ctModal">
+  <div class="mo" style="max-width:580px">
+    <div class="mh"><h3 id="ctTitle">New Contact</h3><button class="xb" onclick="closeCt()">&#215;</button></div>
+    <div class="mbd">
+      <div class="fg">
+        <div class="fgp"><label>Name *</label><input type="text" id="ct_name"></div>
+        <div class="fgp"><label>Team</label><input type="text" id="ct_team" placeholder="e.g. Home Accessory Team"></div>
+        <div class="fgp full"><label>Division / Department</label><input type="text" id="ct_div" placeholder="e.g. Accessory Development Division, Product Development Dept."></div>
+        <div class="fgp"><label>Email</label><input type="email" id="ct_email"></div>
+        <div class="fgp"><label>Phone (Tel)</label><input type="text" id="ct_tel"></div>
+        <div class="fgp"><label>Mobile</label><input type="text" id="ct_mob"></div>
+        <div class="fgp"><label>Fax</label><input type="text" id="ct_fax"></div>
+        <div class="fgp full"><label>Products Handled (P/N, comma-separated)</label><input type="text" id="ct_pns" placeholder="e.g. P-CARS18BK, PWCARS18BK"></div>
+        <div class="fgp full"><label>Notes</label><textarea id="ct_note" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bs" onclick="closeCt()">Cancel</button>
+      <button class="btn bp" onclick="saveCt()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="mb" id="setModal">
   <div class="mo" style="max-width:480px">
@@ -445,7 +479,8 @@ var S = {
   shipped:[],
   po:{},
   shipment:{},
-  dev:[]
+  dev:[],
+  contacts:[]
 };
 var GH={user:'',repo:'',token:''};
 var editOId=null, editPId=null, adjPO=null, expPO=null;
@@ -514,11 +549,12 @@ function payStatus(sm){
 }
 
 function switchTab(n){
-  var ns=['active','shipped','products','dev'];
+  var ns=['active','shipped','products','dev','contacts'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',ns[i]===n);});
   ns.forEach(function(x){var e=document.getElementById('tab-'+x);if(e)e.classList.toggle('h',x!==n);});
   if(n==='shipped')renderShipped();
   if(n==='dev')renderDev();
+  if(n==='contacts')renderContacts();
 }
 
 function pbadge(p){
@@ -940,6 +976,7 @@ function loadGH(){
       if(!S.orders||!Array.isArray(S.orders))S.orders=[];
       if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
       if(!S.dev||!Array.isArray(S.dev))S.dev=[];
+      if(!S.contacts||!Array.isArray(S.contacts))S.contacts=[];
       renderProds();renderOrders();renderShipped();renderDev();ghMsg('Loaded!','s');setSt(true);
     });}else ghMsg('No data file yet.','i');
   }).catch(function(){ghMsg('Failed.','e');});
@@ -962,6 +999,7 @@ function impJ(e){
       if(!S.orders||!Array.isArray(S.orders))S.orders=[];
       if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
       if(!S.dev||!Array.isArray(S.dev))S.dev=[];
+      if(!S.contacts||!Array.isArray(S.contacts))S.contacts=[];
       renderProds();renderOrders();renderShipped();renderDev();alert('Imported.');
     }catch(err){alert('Invalid JSON.');}
   };
@@ -1062,6 +1100,71 @@ function saveDev(){
   closeDev();renderDev();saveGit();
 }
 function delDev(id){if(!confirm('Delete?'))return;S.dev=S.dev.filter(function(x){return x.id!==id;});renderDev();saveGit();}
+
+/* ── CONTACTS ── */
+var editCtId=null;
+function renderContacts(){
+  var el=document.getElementById('ctList');
+  if(!S.contacts||!S.contacts.length){el.innerHTML='<div class="es" style="grid-column:1/-1">No contacts yet.</div>';return;}
+  el.innerHTML=S.contacts.map(function(c){
+    var pns=c.pns?c.pns.split(',').map(function(x){return x.trim();}).filter(Boolean):[];
+    var pnHtml=pns.map(function(p){return '<span class="bdg b1" style="margin:1px">'+p+'</span>';}).join(' ');
+    return '<div class="card" style="padding:16px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px">'
+      +'<div><div style="font-size:15px;font-weight:700;color:var(--text)">'+c.name+'</div>'
+      +(c.team?'<div style="font-size:12px;color:var(--primary);font-weight:600;margin-top:2px">'+c.team+'</div>':'')
+      +(c.div?'<div style="font-size:11px;color:var(--muted);margin-top:1px">'+c.div+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="btn bs xs" onclick="openCt(\''+c.id+'\')">Edit</button>'
+      +'<button class="btn bd xs" onclick="delCt(\''+c.id+'\')">Del</button>'
+      +'</div></div>'
+      +(c.email||c.tel||c.mob||c.fax?'<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">'
+        +(c.email?'<div style="font-size:12px">✉ <a href="mailto:'+c.email+'" style="color:var(--blue)">'+c.email+'</a></div>':'')
+        +(c.tel?'<div style="font-size:12px">📞 '+c.tel+'</div>':'')
+        +(c.mob?'<div style="font-size:12px">📱 '+c.mob+'</div>':'')
+        +(c.fax?'<div style="font-size:12px">🖨 Fax: '+c.fax+'</div>':'')
+        +'</div>':'')
+      +(pnHtml?'<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Products</div>'+pnHtml+'</div>':'')
+      +(c.note?'<div style="font-size:12px;color:var(--muted);font-style:italic">'+c.note+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+function openCt(id){
+  editCtId=id||null;
+  var c=id?S.contacts.find(function(x){return x.id===id;}):null;
+  document.getElementById('ctTitle').textContent=id?'Edit Contact':'New Contact';
+  document.getElementById('ct_name').value=c?c.name:'';
+  document.getElementById('ct_team').value=c?c.team:'';
+  document.getElementById('ct_div').value=c?c.div:'';
+  document.getElementById('ct_email').value=c?c.email:'';
+  document.getElementById('ct_tel').value=c?c.tel:'';
+  document.getElementById('ct_mob').value=c?c.mob:'';
+  document.getElementById('ct_fax').value=c?c.fax:'';
+  document.getElementById('ct_pns').value=c?c.pns:'';
+  document.getElementById('ct_note').value=c?c.note:'';
+  document.getElementById('ctModal').classList.add('op');
+}
+function closeCt(){document.getElementById('ctModal').classList.remove('op');editCtId=null;}
+function saveCt(){
+  var name=document.getElementById('ct_name').value.trim();
+  if(!name){alert('Name is required.');return;}
+  var c={id:editCtId||uid(),name:name,
+    team:document.getElementById('ct_team').value.trim(),
+    div:document.getElementById('ct_div').value.trim(),
+    email:document.getElementById('ct_email').value.trim(),
+    tel:document.getElementById('ct_tel').value.trim(),
+    mob:document.getElementById('ct_mob').value.trim(),
+    fax:document.getElementById('ct_fax').value.trim(),
+    pns:document.getElementById('ct_pns').value.trim(),
+    note:document.getElementById('ct_note').value.trim()
+  };
+  if(!S.contacts)S.contacts=[];
+  if(editCtId){for(var i=0;i<S.contacts.length;i++){if(S.contacts[i].id===editCtId){S.contacts[i]=c;break;}}}
+  else S.contacts.push(c);
+  closeCt();renderContacts();saveGit();
+}
+function delCt(id){if(!confirm('Delete contact?'))return;S.contacts=S.contacts.filter(function(x){return x.id!==id;});renderContacts();saveGit();}
 
 var skuPO=null;
 function openSkuModal(pb){
@@ -1353,6 +1456,7 @@ function parseTWXText(text,pb){
         if(!S.orders||!Array.isArray(S.orders))S.orders=[];
         if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
         if(!S.dev||!Array.isArray(S.dev))S.dev=[];
+      if(!S.contacts||!Array.isArray(S.contacts))S.contacts=[];
         setSt(true);
       }
       renderProds();renderOrders();renderShipped();renderDev();
