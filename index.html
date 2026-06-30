@@ -297,12 +297,26 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
     <div class="mh"><h3 id="shTitle">Shipment Details</h3><button class="xb" onclick="closeSh()">&#215;</button></div>
     <div class="mbd">
       <div class="fg">
-        <div class="fd">Shipping Dates</div>
+        <div class="fd">EXW</div>
         <div class="fgp"><label>EXW Date</label><input id="sh_exw" type="date"></div>
-        <div class="fgp"><label>ETD — Kanagawa</label><input id="sh_etdk" type="date"></div>
-        <div class="fgp"><label>ETD — Kobe</label><input id="sh_etdb" type="date"></div>
-        <div class="fgp"><label>ETA — Kanagawa</label><input id="sh_etak" type="date"></div>
-        <div class="fgp"><label>ETA — Kobe</label><input id="sh_etab" type="date"></div>
+        <div class="fd">Kanagawa (YOKOHAMA)</div>
+        <div class="fgp"><label>ETD</label><input id="sh_etdk" type="date" oninput="autoEtaK()"></div>
+        <div class="fgp"><label>ETA (auto ETD+3)</label><input id="sh_etak" type="date"></div>
+        <div class="fgp"><label>INV No</label><input id="sh_invNoK" placeholder="CS552-..."></div>
+        <div class="fgp"><label>B/L No</label><input id="sh_blK" placeholder="M10361310"></div>
+        <div class="fgp"><label>集裝箱號 Container</label><input id="sh_containerK" placeholder="WHSU..."></div>
+        <div class="fgp"><label>運輸報關行 Broker</label><input id="sh_brokerK"></div>
+        <div class="fgp"><label>出貨方式 Ship Mode</label><input id="sh_shipModeK"></div>
+        <div class="fgp"><label>Deliv Mode</label><input id="sh_delivModeK"></div>
+        <div class="fd">Kobe</div>
+        <div class="fgp"><label>ETD</label><input id="sh_etdb" type="date" oninput="autoEtaB()"></div>
+        <div class="fgp"><label>ETA (auto ETD+3)</label><input id="sh_etab" type="date"></div>
+        <div class="fgp"><label>INV No</label><input id="sh_invNoB" placeholder="CS552-..."></div>
+        <div class="fgp"><label>B/L No</label><input id="sh_blB" placeholder="M10361304"></div>
+        <div class="fgp"><label>集裝箱號 Container</label><input id="sh_containerB" placeholder="WHSU..."></div>
+        <div class="fgp"><label>運輸報關行 Broker</label><input id="sh_brokerB"></div>
+        <div class="fgp"><label>出貨方式 Ship Mode</label><input id="sh_shipModeB"></div>
+        <div class="fgp"><label>Deliv Mode</label><input id="sh_delivModeB"></div>
         <div class="fd">Invoice &amp; Payment (TT 90 days)</div>
         <div class="fgp"><label>Invoice Date</label><input id="sh_inv" type="date" oninput="calcPDue()"></div>
         <div class="fgp ro"><label>Payment Due Date (auto)</label><input id="sh_pdue" readonly></div>
@@ -313,9 +327,15 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
         <div class="fgp full"><label>Note</label><textarea id="sh_nt" rows="2"></textarea></div>
       </div>
     </div>
-    <div class="mf">
-      <button class="btn bs" onclick="closeSh()">Cancel</button>
-      <button class="btn bp" onclick="saveSh()">Save</button>
+    <div class="mf" style="justify-content:space-between">
+      <div>
+        <button class="btn bs" onclick="document.getElementById('twxUp').click()">Upload TWX File</button>
+        <input type="file" id="twxUp" accept=".txt,text/plain" class="h" onchange="parseTWXFile(event)">
+      </div>
+      <div class="g8">
+        <button class="btn bs" onclick="closeSh()">Cancel</button>
+        <button class="btn bp" onclick="saveSh()">Save</button>
+      </div>
     </div>
   </div>
 </div>
@@ -372,7 +392,12 @@ function getPO(b){
 }
 function getShipment(pb){
   if(!S.shipment)S.shipment={};
-  if(!S.shipment[pb])S.shipment[pb]={exw:'',etdk:'',etdb:'',etak:'',etab:'',inv:'',amt:'',pd:'',pamt:'',note:''};
+  if(!S.shipment[pb])S.shipment[pb]={
+    exw:'',
+    etdk:'',etak:'',invNoK:'',blK:'',containerK:'',brokerK:'',shipModeK:'',delivModeK:'',
+    etdb:'',etab:'',invNoB:'',blB:'',containerB:'',brokerB:'',shipModeB:'',delivModeB:'',
+    inv:'',amt:'',pd:'',pamt:'',note:''
+  };
   return S.shipment[pb];
 }
 function addDays(dateStr,n){
@@ -911,11 +936,18 @@ function buildSHDP(pb,sm,lines,orderTotal){
   }
   skuT+='</table>';
   var invAmt=sm.amt?'$'+parseFloat(sm.amt).toFixed(2):(orderTotal?'$'+orderTotal.toFixed(2):'—');
-  var ship='<div class="dg">'+
-    df2('EXW Date',sm.exw||'—')+
-    df2('ETD Kanagawa',sm.etdk||'—')+df2('ETD Kobe',sm.etdb||'—')+
-    df2('ETA Kanagawa',sm.etak||'—')+df2('ETA Kobe',sm.etab||'—')+
-  '</div>';
+  function portGrid(label,etd,eta,invNo,bl,cont,broker,shipMode,delivMode){
+    return '<div class="sl" style="margin-top:12px">'+label+'</div>'+
+      '<div class="dg">'+
+      df2('ETD',etd||'—')+df2('ETA',eta||'—')+
+      df2('INV No',invNo||'—')+df2('B/L',bl||'—')+
+      df2('集裝箱號',cont||'—')+df2('運輸報關行',broker||'—')+
+      df2('出貨方式',shipMode||'—')+df2('Deliv Mode',delivMode||'—')+
+      '</div>';
+  }
+  var ship='<div class="dg">'+df2('EXW Date',sm.exw||'—')+'</div>'+
+    portGrid('Kanagawa (YOKOHAMA)',sm.etdk,sm.etak,sm.invNoK,sm.blK,sm.containerK,sm.brokerK,sm.shipModeK,sm.delivModeK)+
+    portGrid('Kobe',sm.etdb,sm.etab,sm.invNoB,sm.blB,sm.containerB,sm.brokerB,sm.shipModeB,sm.delivModeB);
   var pay='<div class="dg">'+
     df2('Invoice Date',sm.inv||'—')+
     df2('Invoice Amount',invAmt)+
@@ -947,31 +979,90 @@ function unShip(pb){
 }
 
 var shPO=null;
+var shFields=['sh_exw',
+  'sh_etdk','sh_etak','sh_invNoK','sh_blK','sh_containerK','sh_brokerK','sh_shipModeK','sh_delivModeK',
+  'sh_etdb','sh_etab','sh_invNoB','sh_blB','sh_containerB','sh_brokerB','sh_shipModeB','sh_delivModeB',
+  'sh_inv','sh_amt','sh_pd','sh_pamt','sh_nt'];
+var shKeys=['exw',
+  'etdk','etak','invNoK','blK','containerK','brokerK','shipModeK','delivModeK',
+  'etdb','etab','invNoB','blB','containerB','brokerB','shipModeB','delivModeB',
+  'inv','amt','pd','pamt','note'];
 function openShModal(pb){
   shPO=pb;var sm=getShipment(pb);
   document.getElementById('shTitle').textContent='Shipment Details — '+pb;
-  var s=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
-  s('sh_exw',sm.exw);s('sh_etdk',sm.etdk);s('sh_etdb',sm.etdb);
-  s('sh_etak',sm.etak);s('sh_etab',sm.etab);
-  s('sh_inv',sm.inv);s('sh_amt',sm.amt);
-  s('sh_pd',sm.pd);s('sh_pamt',sm.pamt);s('sh_nt',sm.note);
+  for(var i=0;i<shFields.length;i++){var e=document.getElementById(shFields[i]);if(e)e.value=sm[shKeys[i]]||'';}
   calcPDue();
   document.getElementById('shModal').classList.add('op');
 }
-function closeSh(){document.getElementById('shModal').classList.remove('op');shPO=null;}
+function closeSh(){document.getElementById('shModal').classList.remove('op');shPO=null;document.getElementById('twxUp').value='';}
 function calcPDue(){
   var inv=document.getElementById('sh_inv').value;
   document.getElementById('sh_pdue').value=inv?addDays(inv,90):'';
 }
+function autoEtaK(){var v=document.getElementById('sh_etdk').value;if(v)document.getElementById('sh_etak').value=addDays(v,3);}
+function autoEtaB(){var v=document.getElementById('sh_etdb').value;if(v)document.getElementById('sh_etab').value=addDays(v,3);}
 function saveSh(){
   if(!shPO)return;
   var sm=getShipment(shPO);
-  var gv2=function(id){return document.getElementById(id).value.trim();};
-  sm.exw=gv2('sh_exw');sm.etdk=gv2('sh_etdk');sm.etdb=gv2('sh_etdb');
-  sm.etak=gv2('sh_etak');sm.etab=gv2('sh_etab');
-  sm.inv=gv2('sh_inv');sm.amt=gv2('sh_amt');
-  sm.pd=gv2('sh_pd');sm.pamt=gv2('sh_pamt');sm.note=gv2('sh_nt');
+  for(var i=0;i<shFields.length;i++){var e=document.getElementById(shFields[i]);if(e)sm[shKeys[i]]=e.value.trim();}
   closeSh();renderShipped();saveGit();
+}
+function parseTWXFile(ev){
+  var f=ev.target.files[0];if(!f||!shPO)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{parseTWXText(e.target.result,shPO);}catch(err){alert('Parse error: '+err.message);}
+  };
+  r.readAsText(f);
+}
+function parseTWXText(text,pb){
+  var sm=getShipment(pb);
+  var lines=text.split(/\r?\n/);
+  var sections={},cur=null;
+  for(var i=0;i<lines.length;i++){
+    var l=lines[i].trim();
+    if(!l)continue;
+    var lu=l.toUpperCase();
+    if(lu==='YOKOHAMA'||lu.indexOf('YOKOHAMA')===0){cur='K';sections.K=[];continue;}
+    if(lu==='KOBE'||lu.indexOf('KOBE')===0){cur='B';sections.B=[];continue;}
+    if(cur)sections[cur].push(l);
+  }
+  function parseLines(arr){
+    var r={};
+    for(var i=0;i<arr.length;i++){
+      var l=arr[i];
+      var m=l.match(/^([^:]+?):\s*(.+)$/);
+      if(m){r[m[1].trim().toLowerCase()]=m[2].trim();continue;}
+      var m2=l.match(/^(inv\s*no)\s+(.+)$/i);
+      if(m2){r['inv no']=m2[2].trim();}
+    }
+    return r;
+  }
+  function parseETD(s){
+    var m=s&&s.match(/^(\d{1,2})\/(\d{1,2})$/);
+    if(!m)return s||'';
+    var mo=parseInt(m[1]),dy=parseInt(m[2]),now=new Date(),yr=now.getFullYear();
+    var d=new Date(yr,mo-1,dy);
+    if(d-now>60*24*3600*1000)d=new Date(yr-1,mo-1,dy);
+    return d.toISOString().slice(0,10);
+  }
+  function fillPort(suf){
+    var arr=sections[suf];if(!arr)return;
+    var r=parseLines(arr);
+    if(r['inv no'])sm['invNo'+suf]=r['inv no'];
+    if(r['bl'])sm['bl'+suf]=r['bl'];
+    if(r['集裝箱號'])sm['container'+suf]=r['集裝箱號'];
+    if(r['運輸報關行'])sm['broker'+suf]=r['運輸報關行'];
+    if(r['出貨方式'])sm['shipMode'+suf]=r['出貨方式'];
+    if(r['deliv mode'])sm['delivMode'+suf]=r['deliv mode'];
+    if(r['etd']){
+      var etd=parseETD(r['etd']);
+      sm['etd'+suf.toLowerCase()]=etd;
+      sm['eta'+suf.toLowerCase()]=addDays(etd,3);
+    }
+  }
+  fillPort('K');fillPort('B');
+  openShModal(pb);
 }
 
 (function(){
