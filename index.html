@@ -981,6 +981,7 @@ function renderShipped(){
     if(!grps[o.po]){grps[o.po]=[];ord.push(o.po);}
     grps[o.po].push(o);
   }
+  ord.reverse();
   var html='';
   for(var gi=0;gi<ord.length;gi++){
     var pb=ord[gi],lines=grps[pb],sm=getShipment(pb),isE=expSH===pb;
