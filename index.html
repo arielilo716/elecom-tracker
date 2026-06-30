@@ -86,6 +86,12 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
 .ph{text-align:center;padding:80px 20px;color:var(--muted);}
 .ph h3{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text);}
 .es{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px;}
+.bpd{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}
+.bov{background:var(--rbg);color:var(--red);border:1px solid #fecaca;}
+.bpa{background:var(--gbg);color:var(--green);border:1px solid #bbf7d0;}
+.bpn{background:var(--bbg);color:var(--blue);border:1px solid #bfdbfe;}
+.pdue{font-size:11px;font-weight:600;}
+.pdue.ok{color:var(--green);}.pdue.soon{color:var(--yellow);}.pdue.ov{color:var(--red);}
 </style>
 </head>
 <body>
@@ -125,7 +131,24 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
       </div>
     </div>
   </div>
-  <div id="tab-shipped" class="h"><div class="ph"><h3>Shipped &amp; Payment — Coming in Stage 3</h3></div></div>
+  <div id="tab-shipped" class="h">
+    <div class="card">
+      <div class="ch">
+        <h2>Shipped &amp; Payment Tracking</h2>
+        <span style="font-size:12px;color:var(--muted)">Payment Term: TT 90 days from invoice date</span>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr>
+            <th>PO# (Base)</th><th>SKUs</th><th>Total Qty</th><th>Total Amount</th>
+            <th>EXW Date</th><th>ETD (K / B)</th><th>ETA (K / B)</th>
+            <th>Invoice Date</th><th>Payment Due</th><th>Payment Status</th><th></th>
+          </tr></thead>
+          <tbody id="shBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   <div id="tab-products" class="h">
     <div class="card">
       <div class="ch">
@@ -268,6 +291,35 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
   </div>
 </div>
 
+<!-- SHIPMENT MODAL -->
+<div class="mb" id="shModal">
+  <div class="mo" style="max-width:600px">
+    <div class="mh"><h3 id="shTitle">Shipment Details</h3><button class="xb" onclick="closeSh()">&#215;</button></div>
+    <div class="mbd">
+      <div class="fg">
+        <div class="fd">Shipping Dates</div>
+        <div class="fgp"><label>EXW Date</label><input id="sh_exw" type="date"></div>
+        <div class="fgp"><label>ETD — Kanagawa</label><input id="sh_etdk" type="date"></div>
+        <div class="fgp"><label>ETD — Kobe</label><input id="sh_etdb" type="date"></div>
+        <div class="fgp"><label>ETA — Kanagawa</label><input id="sh_etak" type="date"></div>
+        <div class="fgp"><label>ETA — Kobe</label><input id="sh_etab" type="date"></div>
+        <div class="fd">Invoice &amp; Payment (TT 90 days)</div>
+        <div class="fgp"><label>Invoice Date</label><input id="sh_inv" type="date" oninput="calcPDue()"></div>
+        <div class="fgp ro"><label>Payment Due Date (auto)</label><input id="sh_pdue" readonly></div>
+        <div class="fgp"><label>Invoice Amount USD (override)</label><input id="sh_amt" type="number" step="0.01" placeholder="leave blank to use order total"></div>
+        <div class="fd">Payment Received</div>
+        <div class="fgp"><label>Date Received</label><input id="sh_pd" type="date"></div>
+        <div class="fgp"><label>Amount Received USD</label><input id="sh_pamt" type="number" step="0.01" placeholder="0.00"></div>
+        <div class="fgp full"><label>Note</label><textarea id="sh_nt" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bs" onclick="closeSh()">Cancel</button>
+      <button class="btn bp" onclick="saveSh()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var S = {
   fxRate:'',
@@ -280,7 +332,8 @@ var S = {
   ],
   orders:[],
   shipped:[],
-  po:{}
+  po:{},
+  shipment:{}
 };
 var GH={user:'',repo:'',token:''};
 var editOId=null, editPId=null, adjPO=null, expPO=null;
@@ -317,11 +370,31 @@ function getPO(b){
   if(!S.po[b])S.po[b]={phase:1,signBack:'',twx:false,issued:false,pcNotif:false,inspEmail:'',inspNotice:'',shipDone:false,inspDate:'',adjLog:[],on:'',rn:'',pn:''};
   return S.po[b];
 }
+function getShipment(pb){
+  if(!S.shipment)S.shipment={};
+  if(!S.shipment[pb])S.shipment[pb]={exw:'',etdk:'',etdb:'',etak:'',etab:'',inv:'',amt:'',pd:'',pamt:'',note:''};
+  return S.shipment[pb];
+}
+function addDays(dateStr,n){
+  if(!dateStr)return '';
+  var d=new Date(dateStr);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);
+}
+function payDue(sm){return addDays(sm.inv,90);}
+function payStatus(sm){
+  var due=payDue(sm);
+  if(sm.pd)return 'paid';
+  if(!due)return 'pending';
+  var diff=Math.ceil((new Date(due)-new Date())/86400000);
+  if(diff<0)return 'overdue';
+  if(diff<=14)return 'soon';
+  return 'pending';
+}
 
 function switchTab(n){
   var ns=['active','shipped','products','dev'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',ns[i]===n);});
   ns.forEach(function(x){var e=document.getElementById('tab-'+x);if(e)e.classList.toggle('h',x!==n);});
+  if(n==='shipped')renderShipped();
 }
 
 function pbadge(p){
@@ -514,7 +587,9 @@ function moveSh(pb){
   var r=[],m=[];
   for(var i=0;i<S.orders.length;i++){if(S.orders[i].po===pb)m.push(S.orders[i]);else r.push(S.orders[i]);}
   S.orders=r;for(var j=0;j<m.length;j++)S.shipped.push(m[j]);
+  getShipment(pb);
   if(expPO===pb)expPO=null;renderOrders();saveGit();
+  switchTab('shipped');
 }
 function resetFoot(){
   document.getElementById('omFoot').innerHTML=
@@ -736,9 +811,10 @@ function loadGH(){
   .then(function(r){
     if(r.ok){return r.json().then(function(d){
       S=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-      if(!S.po)S.po={};
+      if(!S.po)S.po={};if(!S.shipment)S.shipment={};
       if(!S.orders||!Array.isArray(S.orders))S.orders=[];
-      renderProds();renderOrders();ghMsg('Loaded!','s');setSt(true);
+      if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
+      renderProds();renderOrders();renderShipped();ghMsg('Loaded!','s');setSt(true);
     });}else ghMsg('No data file yet.','i');
   }).catch(function(){ghMsg('Failed.','e');});
 }
@@ -756,12 +832,145 @@ function impJ(e){
   r.onload=function(ev){
     try{
       S=JSON.parse(ev.target.result);
-      if(!S.po)S.po={};
+      if(!S.po)S.po={};if(!S.shipment)S.shipment={};
       if(!S.orders||!Array.isArray(S.orders))S.orders=[];
-      renderProds();renderOrders();alert('Imported.');
+      if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
+      renderProds();renderOrders();renderShipped();alert('Imported.');
     }catch(err){alert('Invalid JSON.');}
   };
   r.readAsText(f);e.target.value='';
+}
+
+var expSH=null;
+function renderShipped(){
+  var tb=document.getElementById('shBody');if(!tb)return;
+  if(!S.shipped||!S.shipped.length){tb.innerHTML='<tr><td colspan="11"><div class="es">No shipped orders yet. Mark an order as shipped from Active Orders.</div></td></tr>';return;}
+  var grps={},ord=[];
+  for(var i=0;i<S.shipped.length;i++){
+    var o=S.shipped[i];
+    if(!grps[o.po]){grps[o.po]=[];ord.push(o.po);}
+    grps[o.po].push(o);
+  }
+  var html='';
+  for(var gi=0;gi<ord.length;gi++){
+    var pb=ord[gi],lines=grps[pb],sm=getShipment(pb),isE=expSH===pb;
+    var tq=0,ta=0,ha=false;
+    for(var si=0;si<lines.length;si++){tq+=parseInt(lines[si].qc)||0;if(lines[si].price&&lines[si].qc){ta+=parseFloat(lines[si].price)*(parseInt(lines[si].qc)||0);ha=true;}}
+    var invAmt=sm.amt?parseFloat(sm.amt):ta;
+    var due=payDue(sm),st=payStatus(sm);
+    var stBadge={paid:'<span class="bdg bpa">Paid</span>',overdue:'<span class="bdg bov">Overdue</span>',soon:'<span class="bdg bpd">Due Soon</span>',pending:'<span class="bdg bpn">Pending</span>'};
+    var dueDisp='—';
+    if(due){
+      var diff=Math.ceil((new Date(due)-new Date())/86400000);
+      var dc=st==='paid'?'ok':st==='overdue'?'ov':st==='soon'?'soon':'ok';
+      dueDisp='<div>'+due+'</div><div class="pdue '+dc+'">'+(st==='paid'?'Paid':(diff<0?Math.abs(diff)+'d overdue':diff+'d left'))+'</div>';
+    }
+    html+='<tr class="sr'+(isE?' on':'')+'" onclick="togSH(\''+pb+'\')">'+
+      '<td style="color:var(--pd);padding:8px 12px"><span class="mono">'+pb+'</span></td>'+
+      '<td style="padding:8px 12px">'+lines.length+' SKU'+(lines.length>1?'s':'')+'</td>'+
+      '<td style="padding:8px 12px">'+tq+' pcs</td>'+
+      '<td style="padding:8px 12px">'+(ha?'$'+ta.toFixed(2):'—')+'</td>'+
+      '<td style="padding:8px 12px">'+(sm.exw||'—')+'</td>'+
+      '<td style="padding:8px 12px;font-size:12px">'+(sm.etdk||'—')+'<br>'+(sm.etdb||'—')+'</td>'+
+      '<td style="padding:8px 12px;font-size:12px">'+(sm.etak||'—')+'<br>'+(sm.etab||'—')+'</td>'+
+      '<td style="padding:8px 12px">'+(sm.inv||'—')+'</td>'+
+      '<td style="padding:8px 12px">'+dueDisp+'</td>'+
+      '<td style="padding:8px 12px">'+(stBadge[st]||stBadge.pending)+'</td>'+
+      '<td style="padding:8px 12px" onclick="event.stopPropagation()">'+
+        '<button class="btn bs xs" onclick="openShModal(\''+pb+'\')">Edit</button>'+
+      '</td>'+
+    '</tr>';
+    html+='<tr class="dr'+(isE?'':' h')+'" id="shdr-'+pb+'"><td colspan="11">'+buildSHDP(pb,sm,lines,ta)+'</td></tr>';
+  }
+  tb.innerHTML=html;
+}
+function togSH(pb){expSH=expSH===pb?null:pb;renderShipped();}
+
+function buildSHDP(pb,sm,lines,orderTotal){
+  var due=payDue(sm);
+  var skuT='<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px">'+
+    '<tr style="color:var(--muted);border-bottom:1px solid var(--border)">'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">客人料號</th>'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">廠內料號</th>'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">Kanagawa</th>'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">Kobe</th>'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">Combined</th>'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">Unit Price</th>'+
+    '<th style="text-align:left;padding:4px 8px;font-weight:600">Total</th></tr>';
+  for(var li=0;li<lines.length;li++){
+    var o=lines[li],lt=o.price&&o.qc?'$'+(parseFloat(o.price)*parseInt(o.qc)).toFixed(2):'—';
+    skuT+='<tr style="border-bottom:1px solid var(--border)">'+
+      '<td style="padding:6px 8px"><span class="mono">'+o.cpn+'</span></td>'+
+      '<td style="padding:6px 8px"><span class="mono">'+(o.ipn||'—')+'</span></td>'+
+      '<td style="padding:6px 8px">'+(o.qk||0)+' pcs</td>'+
+      '<td style="padding:6px 8px">'+(o.qb||0)+' pcs</td>'+
+      '<td style="padding:6px 8px;font-weight:600">'+(o.qc||0)+' pcs</td>'+
+      '<td style="padding:6px 8px">'+fU(o.price)+'</td>'+
+      '<td style="padding:6px 8px">'+lt+'</td></tr>';
+  }
+  skuT+='</table>';
+  var invAmt=sm.amt?'$'+parseFloat(sm.amt).toFixed(2):(orderTotal?'$'+orderTotal.toFixed(2):'—');
+  var ship='<div class="dg">'+
+    df2('EXW Date',sm.exw||'—')+
+    df2('ETD Kanagawa',sm.etdk||'—')+df2('ETD Kobe',sm.etdb||'—')+
+    df2('ETA Kanagawa',sm.etak||'—')+df2('ETA Kobe',sm.etab||'—')+
+  '</div>';
+  var pay='<div class="dg">'+
+    df2('Invoice Date',sm.inv||'—')+
+    df2('Invoice Amount',invAmt)+
+    df2('Payment Due (TT 90d)',due||'—')+
+    df2('Date Received',sm.pd||'—')+
+    df2('Amount Received',sm.pamt?'$'+parseFloat(sm.pamt).toFixed(2):'—')+
+    (sm.note?df2('Note',sm.note):'')+
+  '</div>';
+  var acts='<div class="ab">'+
+    '<button class="btn bw sm" onclick="openShModal(\''+pb+'\');event.stopPropagation()">Edit Shipment / Payment</button>'+
+    '<button class="btn bd sm" onclick="unShip(\''+pb+'\');event.stopPropagation()">Move back to Active</button>'+
+  '</div>';
+  return '<div class="dp">'+
+    '<div class="sl">SKU Breakdown</div>'+skuT+
+    '<div class="sl">Shipping Details</div>'+ship+
+    '<div class="sl" style="margin-top:16px">Payment Details</div>'+pay+
+    acts+'</div>';
+}
+
+function unShip(pb){
+  if(!confirm('Move '+pb+' back to Active Orders?'))return;
+  var r=[],m=[];
+  for(var i=0;i<S.shipped.length;i++){if(S.shipped[i].po===pb)m.push(S.shipped[i]);else r.push(S.shipped[i]);}
+  S.shipped=r;
+  for(var j=0;j<m.length;j++){m[j].id=m[j].id||uid();S.orders.push(m[j]);}
+  if(expSH===pb)expSH=null;
+  renderShipped();renderOrders();saveGit();
+  switchTab('active');
+}
+
+var shPO=null;
+function openShModal(pb){
+  shPO=pb;var sm=getShipment(pb);
+  document.getElementById('shTitle').textContent='Shipment Details — '+pb;
+  var s=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+  s('sh_exw',sm.exw);s('sh_etdk',sm.etdk);s('sh_etdb',sm.etdb);
+  s('sh_etak',sm.etak);s('sh_etab',sm.etab);
+  s('sh_inv',sm.inv);s('sh_amt',sm.amt);
+  s('sh_pd',sm.pd);s('sh_pamt',sm.pamt);s('sh_nt',sm.note);
+  calcPDue();
+  document.getElementById('shModal').classList.add('op');
+}
+function closeSh(){document.getElementById('shModal').classList.remove('op');shPO=null;}
+function calcPDue(){
+  var inv=document.getElementById('sh_inv').value;
+  document.getElementById('sh_pdue').value=inv?addDays(inv,90):'';
+}
+function saveSh(){
+  if(!shPO)return;
+  var sm=getShipment(shPO);
+  var gv2=function(id){return document.getElementById(id).value.trim();};
+  sm.exw=gv2('sh_exw');sm.etdk=gv2('sh_etdk');sm.etdb=gv2('sh_etdb');
+  sm.etak=gv2('sh_etak');sm.etab=gv2('sh_etab');
+  sm.inv=gv2('sh_inv');sm.amt=gv2('sh_amt');
+  sm.pd=gv2('sh_pd');sm.pamt=gv2('sh_pamt');sm.note=gv2('sh_nt');
+  closeSh();renderShipped();saveGit();
 }
 
 (function(){
@@ -773,11 +982,12 @@ function impJ(e){
     .then(function(d){
       if(d){
         S=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-        if(!S.po)S.po={};
+        if(!S.po)S.po={};if(!S.shipment)S.shipment={};
         if(!S.orders||!Array.isArray(S.orders))S.orders=[];
+        if(!S.shipped||!Array.isArray(S.shipped))S.shipped=[];
         setSt(true);
       }
-      renderProds();renderOrders();
+      renderProds();renderOrders();renderShipped();
     })
     .catch(function(){setSt(false);renderProds();renderOrders();});
   }else{renderProds();renderOrders();}
