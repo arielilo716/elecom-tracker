@@ -291,6 +291,26 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
   </div>
 </div>
 
+<!-- REFS EDIT MODAL (Shipped tab) -->
+<div class="mb" id="refsModal">
+  <div class="mo" style="max-width:480px">
+    <div class="mh"><h3>Edit Refs &amp; Inspection Date</h3><button class="xb" onclick="closeRefs()">&#215;</button></div>
+    <div class="mbd">
+      <div class="fg">
+        <div class="fgp"><label>驗貨日期 Inspection Date</label><input id="rf_insp" type="date"></div>
+        <div class="fgp"><label>交期 (工場回答出荷日)</label><input id="rf_fc" type="date"></div>
+        <div class="fgp"><label>訂單單號</label><input id="rf_on"></div>
+        <div class="fgp"><label>請購單號</label><input id="rf_rn"></div>
+        <div class="fgp full"><label>採購單號</label><input id="rf_pn"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bs" onclick="closeRefs()">Cancel</button>
+      <button class="btn bp" onclick="saveRefs()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- SHIPMENT MODAL -->
 <div class="mb" id="shModal">
   <div class="mo" style="max-width:600px">
@@ -867,6 +887,29 @@ function impJ(e){
   r.readAsText(f);e.target.value='';
 }
 
+var refsPO=null;
+function openRefs(pb){
+  refsPO=pb;
+  var pd=S.po&&S.po[pb]?S.po[pb]:{};
+  var fc0=pd.fcOverride||(function(){for(var i=0;i<S.shipped.length;i++)if(S.shipped[i].po===pb)return S.shipped[i].fc;return '';}());
+  document.getElementById('rf_insp').value=pd.inspDate||'';
+  document.getElementById('rf_fc').value=fc0||'';
+  document.getElementById('rf_on').value=pd.on||'';
+  document.getElementById('rf_rn').value=pd.rn||'';
+  document.getElementById('rf_pn').value=pd.pn||'';
+  document.getElementById('refsModal').classList.add('op');
+}
+function closeRefs(){document.getElementById('refsModal').classList.remove('op');refsPO=null;}
+function saveRefs(){
+  if(!refsPO)return;
+  var pd=getPO(refsPO);
+  pd.inspDate=document.getElementById('rf_insp').value;
+  pd.fcOverride=document.getElementById('rf_fc').value;
+  pd.on=document.getElementById('rf_on').value.trim();
+  pd.rn=document.getElementById('rf_rn').value.trim();
+  pd.pn=document.getElementById('rf_pn').value.trim();
+  closeRefs();renderShipped();saveGit();
+}
 var expSH=null;
 function renderShipped(){
   var tb=document.getElementById('shBody');if(!tb)return;
@@ -957,7 +1000,7 @@ function buildSHDP(pb,sm,lines,orderTotal){
     (sm.note?df2('Note',sm.note):'')+
   '</div>';
   var pd=S.po&&S.po[pb]?S.po[pb]:{};
-  var fc0=lines.length?lines[0].fc:'';
+  var fc0=pd.fcOverride||(lines.length?lines[0].fc:'');
   var refs='<div class="dg">'+
     df2('驗貨日期',pd.inspDate||'—')+
     df2('交期 (工場回答出荷日)',fc0||'—')+
@@ -971,7 +1014,7 @@ function buildSHDP(pb,sm,lines,orderTotal){
   '</div>';
   return '<div class="dp">'+
     '<div class="sl">SKU Breakdown</div>'+skuT+
-    '<div class="sl">Refs + Inspection Date</div>'+refs+
+    '<div class="sl" style="display:flex;justify-content:space-between;align-items:center">Refs + Inspection Date<button class="btn bs xs" onclick="openRefs(\''+pb+'\');event.stopPropagation()">Edit</button></div>'+refs+
     '<div class="sl" style="margin-top:16px">Shipping Details</div>'+ship+
     '<div class="sl" style="margin-top:16px">Payment Details</div>'+pay+
     acts+'</div>';
