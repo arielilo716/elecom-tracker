@@ -166,7 +166,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
       <div class="tw">
         <table>
           <thead><tr><th>客人料號</th><th>廠內料號</th><th>Product SKU</th><th>Description</th>
-          <th>Unit Price USD 500/1000</th><th>Production Cost VND (≈ USD)</th><th>Status</th><th>Note</th><th></th></tr></thead>
+          <th>Unit Price USD 500/1000</th><th>Production Cost VND (≈ USD)</th><th>担当</th><th>Status</th><th>Note</th><th></th></tr></thead>
           <tbody id="pBody"></tbody>
         </table>
       </div>
@@ -278,6 +278,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
         <div class="fgp"><label>Production Cost VND</label><input id="f_pc" type="number" step="1" oninput="updUSD()"></div>
         <div class="fgp"><label>approx USD</label><input id="f_pu" readonly style="background:var(--bg);color:var(--muted)"></div>
         <div class="fd">Other</div>
+        <div class="fgp"><label>担当 (Contact)</label><select id="f_tc"></select></div>
         <div class="fgp"><label>Status</label><select id="f_st"><option value="Active">Active</option><option value="Discontinued">Discontinued</option></select></div>
         <div class="fgp full"><label>Note</label><textarea id="f_nt" rows="2"></textarea></div>
       </div>
@@ -890,6 +891,7 @@ function renderProds(){
         '<div class="pr"><span class="ti">1000 pcs</span><span class="pv">'+fU(p.p1000)+'</span></div>'+
       '</div></td>'+
       '<td><div class="vnd">'+fV(p.pc)+'</div>'+(u?'<div class="ue">≈ $'+u+'</div>':'')+'</td>'+
+      '<td style="font-size:12px">'+(p.tantou||'—')+'</td>'+
       '<td><span class="bdg '+(p.status==='Active'?'bac':'bdc')+'">'+p.status+'</span></td>'+
       '<td style="max-width:120px;white-space:normal;font-size:12px;color:var(--muted)">'+(p.note||'—')+'</td>'+
       '<td><div class="g8">'+
@@ -908,6 +910,9 @@ function openPM(id){
   document.getElementById('f_pc').value=p.pc||'';document.getElementById('f_st').value=p.status||'Active';
   document.getElementById('f_nt').value=p.note||'';
   var u=v2u(p.pc);document.getElementById('f_pu').value=u?'$'+u:'—';
+  var tc=document.getElementById('f_tc');
+  tc.innerHTML='<option value="">— None —</option>';
+  (S.contacts||[]).forEach(function(c){var o=document.createElement('option');o.value=c.name;o.textContent=c.name+(c.team?' ('+c.team+')':'');if(p.tantou===c.name)o.selected=true;tc.appendChild(o);});
   document.getElementById('pmModal').classList.add('op');
 }
 function editP(id){openPM(id);}
@@ -918,6 +923,7 @@ function saveP(){
   var p={id:editPId||uid(),custPN:cp,iPN:ip,sku:document.getElementById('f_sk').value.trim(),
     desc:document.getElementById('f_de').value.trim(),p500:document.getElementById('f_p5').value,
     p1000:document.getElementById('f_p10').value,pc:document.getElementById('f_pc').value,
+    tantou:document.getElementById('f_tc').value,
     status:document.getElementById('f_st').value,note:document.getElementById('f_nt').value.trim()};
   if(editPId){for(var i=0;i<S.products.length;i++){if(S.products[i].id===editPId){S.products[i]=p;break;}}}
   else S.products.push(p);
