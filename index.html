@@ -956,13 +956,23 @@ function buildSHDP(pb,sm,lines,orderTotal){
     df2('Amount Received',sm.pamt?'$'+parseFloat(sm.pamt).toFixed(2):'—')+
     (sm.note?df2('Note',sm.note):'')+
   '</div>';
+  var pd=S.po&&S.po[pb]?S.po[pb]:{};
+  var fc0=lines.length?lines[0].fc:'';
+  var refs='<div class="dg">'+
+    df2('驗貨日期',pd.inspDate||'—')+
+    df2('交期 (工場回答出荷日)',fc0||'—')+
+    df2('訂單單號',pd.on||'—')+
+    df2('請購單號',pd.rn||'—')+
+    df2('採購單號',pd.pn||'—')+
+  '</div>';
   var acts='<div class="ab">'+
     '<button class="btn bw sm" onclick="openShModal(\''+pb+'\');event.stopPropagation()">Edit Shipment / Payment</button>'+
     '<button class="btn bd sm" onclick="unShip(\''+pb+'\');event.stopPropagation()">Move back to Active</button>'+
   '</div>';
   return '<div class="dp">'+
     '<div class="sl">SKU Breakdown</div>'+skuT+
-    '<div class="sl">Shipping Details</div>'+ship+
+    '<div class="sl">Refs + Inspection Date</div>'+refs+
+    '<div class="sl" style="margin-top:16px">Shipping Details</div>'+ship+
     '<div class="sl" style="margin-top:16px">Payment Details</div>'+pay+
     acts+'</div>';
 }
