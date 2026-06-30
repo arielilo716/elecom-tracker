@@ -311,6 +311,18 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
   </div>
 </div>
 
+<!-- SKU EDIT MODAL (Shipped tab) -->
+<div class="mb" id="skuModal">
+  <div class="mo" style="max-width:660px">
+    <div class="mh"><h3>Edit SKU Lines</h3><button class="xb" onclick="closeSkuModal()">&#215;</button></div>
+    <div class="mbd" id="skuModalBody"></div>
+    <div class="mf">
+      <button class="btn bs" onclick="closeSkuModal()">Cancel</button>
+      <button class="btn bp" onclick="saveSkuModal()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- SHIPMENT MODAL -->
 <div class="mb" id="shModal">
   <div class="mo" style="max-width:600px">
@@ -893,6 +905,49 @@ function impJ(e){
   r.readAsText(f);e.target.value='';
 }
 
+var skuPO=null;
+function openSkuModal(pb){
+  skuPO=pb;
+  var lines=S.shipped.filter(function(o){return o.po===pb;});
+  var html='<div style="display:flex;flex-direction:column;gap:16px;padding:4px 0">';
+  for(var i=0;i<lines.length;i++){
+    var o=lines[i];
+    var tot=o.price&&o.qc?'$'+(parseFloat(o.price)*(parseInt(o.qc)||0)).toFixed(2):'—';
+    html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">'+
+      '<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:10px"><span class="mono">'+o.cpn+'</span> / <span class="mono">'+(o.ipn||'—')+'</span></div>'+
+      '<div class="fg">'+
+        '<div class="fgp"><label>Kanagawa Qty</label><input id="sk_qk_'+i+'" type="number" value="'+(o.qk||0)+'" oninput="recalcSkuRow('+i+')"></div>'+
+        '<div class="fgp"><label>Kobe Qty</label><input id="sk_qb_'+i+'" type="number" value="'+(o.qb||0)+'" oninput="recalcSkuRow('+i+')"></div>'+
+        '<div class="fgp ro"><label>Combined Qty</label><input id="sk_qc_'+i+'" readonly value="'+(o.qc||0)+'"></div>'+
+        '<div class="fgp"><label>Unit Price USD</label><input id="sk_pr_'+i+'" type="number" step="0.01" value="'+(o.price||'')+'" oninput="recalcSkuRow('+i+')"></div>'+
+        '<div class="fgp ro"><label>Line Total</label><input id="sk_tot_'+i+'" readonly value="'+tot+'"></div>'+
+      '</div>'+
+    '</div>';
+  }
+  html+='</div>';
+  document.getElementById('skuModalBody').innerHTML=html;
+  document.getElementById('skuModal').classList.add('op');
+}
+function recalcSkuRow(i){
+  var qk=parseInt(document.getElementById('sk_qk_'+i).value)||0;
+  var qb=parseInt(document.getElementById('sk_qb_'+i).value)||0;
+  var qc=qk+qb;
+  var pr=parseFloat(document.getElementById('sk_pr_'+i).value)||0;
+  document.getElementById('sk_qc_'+i).value=qc;
+  document.getElementById('sk_tot_'+i).value=qc&&pr?'$'+(qc*pr).toFixed(2):'—';
+}
+function closeSkuModal(){document.getElementById('skuModal').classList.remove('op');skuPO=null;}
+function saveSkuModal(){
+  if(!skuPO)return;
+  var lines=S.shipped.filter(function(o){return o.po===skuPO;});
+  for(var i=0;i<lines.length;i++){
+    var qk=parseInt(document.getElementById('sk_qk_'+i).value)||0;
+    var qb=parseInt(document.getElementById('sk_qb_'+i).value)||0;
+    lines[i].qk=qk;lines[i].qb=qb;lines[i].qc=qk+qb;
+    lines[i].price=parseFloat(document.getElementById('sk_pr_'+i).value)||'';
+  }
+  closeSkuModal();renderShipped();saveGit();
+}
 var refsPO=null;
 function openRefs(pb){
   refsPO=pb;
@@ -1019,7 +1074,7 @@ function buildSHDP(pb,sm,lines,orderTotal){
     '<button class="btn bd sm" onclick="unShip(\''+pb+'\');event.stopPropagation()">Move back to Active</button>'+
   '</div>';
   return '<div class="dp">'+
-    '<div class="sl">SKU Breakdown</div>'+skuT+
+    '<div class="sl" style="display:flex;justify-content:space-between;align-items:center">SKU Breakdown<button class="btn bs xs" onclick="openSkuModal(\''+pb+'\');event.stopPropagation()">Edit</button></div>'+skuT+
     '<div class="sl" style="display:flex;justify-content:space-between;align-items:center">Refs + Inspection Date<button class="btn bs xs" onclick="openRefs(\''+pb+'\');event.stopPropagation()">Edit</button></div>'+refs+
     '<div class="sl" style="margin-top:16px">Shipping Details</div>'+ship+
     '<div class="sl" style="margin-top:16px">Payment Details</div>'+pay+
