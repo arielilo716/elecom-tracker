@@ -192,7 +192,6 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
         <div class="fd">Dates</div>
         <div class="fgp"><label>工場回答出荷日 P/I</label><input id="o_fc" type="date"></div>
         <div class="fgp"><label>驗貨日期 Inspection Date</label><input id="o_id" type="date"></div>
-        <div class="fgp"><label>交期 Delivery Date</label><input id="o_dl" type="date"></div>
         <div class="fd">Pricing</div>
         <div class="fgp"><label>Unit Price USD (editable)</label><input id="o_up" type="number" step="0.01" placeholder="0.00" oninput="reCalc()"></div>
         <div class="fgp ro"><label>Total Amount USD</label><input id="o_tot" readonly></div>
@@ -368,7 +367,7 @@ function gv(id){return document.getElementById(id).value.trim();}
 
 function getPO(b){
   if(!S.po)S.po={};
-  if(!S.po[b])S.po[b]={phase:1,signBack:'',twx:false,issued:false,pcNotif:false,inspEmail:'',inspNotice:'',shipDone:false,inspDate:'',delDate:'',adjLog:[],on:'',rn:'',pn:''};
+  if(!S.po[b])S.po[b]={phase:1,signBack:'',twx:false,issued:false,pcNotif:false,inspEmail:'',inspNotice:'',shipDone:false,inspDate:'',adjLog:[],on:'',rn:'',pn:''};
   return S.po[b];
 }
 function getShipment(pb){
@@ -494,8 +493,9 @@ function buildDP(pb,pd,lines){
   }
   skuT+='</table>';
 
+  var fc0=lines.length?lines[0].fc:'';
   var refs='<div class="dg">'+
-    df2('驗貨日期',pd.inspDate)+df2('交期',pd.delDate||'—')+df2('訂單單號',pd.on||'—')+df2('請購單號',pd.rn||'—')+df2('採購單號',pd.pn||'—')+
+    df2('驗貨日期',pd.inspDate)+df2('交期 (工場回答出荷日)',fc0||'—')+df2('訂單單號',pd.on||'—')+df2('請購單號',pd.rn||'—')+df2('採購單號',pd.pn||'—')+
   '</div>';
 
   var adj='';
@@ -551,18 +551,18 @@ function editO(id){
   var o=fOrd(id);if(!o)return;
   editOId=id;var pd=getPO(o.po);
   document.getElementById('omTitle').textContent='Edit Order';document.getElementById('cNote').classList.add('h');
-  fillOF(Object.assign({},o,{inspDate:pd.inspDate,delDate:pd.delDate,on:pd.on,rn:pd.rn,pn:pd.pn}));
+  fillOF(Object.assign({},o,{inspDate:pd.inspDate,on:pd.on,rn:pd.rn,pn:pd.pn}));
   resetFoot();document.getElementById('omModal').classList.add('op');
 }
 function closeOM(){document.getElementById('omModal').classList.remove('op');editOId=null;}
 function clrOF(){
-  ['o_po','o_od','o_cpn','o_ipn','o_qk','o_qb','o_qc','o_fc','o_id','o_dl','o_up','o_tot','o_on','o_rn','o_pn','o_nt']
+  ['o_po','o_od','o_cpn','o_ipn','o_qk','o_qb','o_qc','o_fc','o_id','o_up','o_tot','o_on','o_rn','o_pn','o_nt']
   .forEach(function(id){var e=document.getElementById(id);if(e){e.value='';delete e.dataset.ed;}});
 }
 function fillOF(o){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
   s('o_po',o.po);s('o_od',o.od);s('o_cpn',o.cpn);s('o_ipn',o.ipn);
-  s('o_qk',o.qk);s('o_qb',o.qb);s('o_qc',o.qc);s('o_fc',o.fc);s('o_id',o.inspDate);s('o_dl',o.delDate);
+  s('o_qk',o.qk);s('o_qb',o.qb);s('o_qc',o.qc);s('o_fc',o.fc);s('o_id',o.inspDate);
   s('o_up',o.price?Number(o.price).toFixed(2):'');
   s('o_tot',o.price&&o.qc?(parseFloat(o.price)*parseInt(o.qc)).toFixed(2):'');
   s('o_on',o.on);s('o_rn',o.rn);s('o_pn',o.pn);s('o_nt',o.note);
@@ -570,13 +570,13 @@ function fillOF(o){
 function bldOF(){
   var k=parseInt(gv('o_qk'))||0,b=parseInt(gv('o_qb'))||0;
   return{po:gv('o_po'),od:gv('o_od'),cpn:gv('o_cpn'),ipn:gv('o_ipn'),qk:k,qb:b,qc:k+b,
-    fc:gv('o_fc'),inspDate:gv('o_id'),delDate:gv('o_dl'),price:parseFloat(gv('o_up'))||'',
+    fc:gv('o_fc'),inspDate:gv('o_id'),price:parseFloat(gv('o_up'))||'',
     on:gv('o_on'),rn:gv('o_rn'),pn:gv('o_pn'),note:gv('o_nt')};
 }
 function saveO(){
   var d=bldOF();if(!d.po||!d.cpn){alert('PO# and Customer P/N required.');return;}
   var pd=getPO(d.po);
-  if(d.inspDate)pd.inspDate=d.inspDate;if(d.delDate)pd.delDate=d.delDate;if(d.on)pd.on=d.on;if(d.rn)pd.rn=d.rn;if(d.pn)pd.pn=d.pn;
+  if(d.inspDate)pd.inspDate=d.inspDate;if(d.on)pd.on=d.on;if(d.rn)pd.rn=d.rn;if(d.pn)pd.pn=d.pn;
   var o={id:editOId||uid(),po:d.po,od:d.od,cpn:d.cpn,ipn:d.ipn,qk:d.qk,qb:d.qb,qc:d.qc,fc:d.fc,price:d.price};
   if(editOId){for(var i=0;i<S.orders.length;i++){if(S.orders[i].id===editOId){S.orders[i]=o;break;}}}
   else S.orders.push(o);
@@ -602,7 +602,7 @@ function capRefs(){lastRefs={on:gv('o_on'),rn:gv('o_rn'),pn:gv('o_pn')};}
 function doSave(){
   var d=bldOF();
   var pd=getPO(d.po);
-  if(d.inspDate)pd.inspDate=d.inspDate;if(d.delDate)pd.delDate=d.delDate;if(d.on)pd.on=d.on;if(d.rn)pd.rn=d.rn;if(d.pn)pd.pn=d.pn;
+  if(d.inspDate)pd.inspDate=d.inspDate;if(d.on)pd.on=d.on;if(d.rn)pd.rn=d.rn;if(d.pn)pd.pn=d.pn;
   S.orders.push({id:uid(),po:d.po,od:d.od,cpn:d.cpn,ipn:d.ipn,qk:d.qk,qb:d.qb,qc:d.qc,fc:d.fc,price:d.price});
 }
 function sNext(){capRefs();doSave();pIdx++;openQ(pQueue,pIdx);}
