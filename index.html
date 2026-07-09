@@ -1413,16 +1413,23 @@ function parseTWXText(text,pb){
     var r={};
     for(var i=0;i<arr.length;i++){
       var l=arr[i];
-      var m=l.match(/^([^:]+?):\s*(.+)$/);
+      // split on colon or fullwidth semicolon (；), either ASCII or Chinese
+      var m=l.match(/^([^:；]+?)[：:；]\s*(.+)$/);
       if(m){r[m[1].trim().toLowerCase()]=m[2].trim();continue;}
+      // bare INV No without separator: "INV No CS552-..."
       var m2=l.match(/^(inv\s*no)\s+(\S.*)$/i);
-      if(m2){r['inv no']=m2[2].trim();}
+      if(m2){r['inv no']=m2[2].trim();continue;}
+      // bare line that looks like an INV/CS number (e.g. "CS552-2606150001")
+      if(/^[A-Z]{2,}\d{3}-\d+$/i.test(l)){r['_inv']=l.trim();}
     }
     return r;
   }
   function parseETD(s){
-    var m=s&&s.match(/^(\d{1,2})\/(\d{1,2})$/);
-    if(!m)return s||'';
+    if(!s)return '';
+    // strip any non-date prefix (e.g. "预计", "預計", spaces)
+    s=s.replace(/^[^\d]*/, '');
+    var m=s.match(/^(\d{1,2})\/(\d{1,2})$/);
+    if(!m)return s;
     var mo=parseInt(m[1]),dy=parseInt(m[2]),now=new Date(),yr=now.getFullYear();
     var pad=function(n){return String(n).padStart(2,'0');};
     var ds=yr+'-'+pad(mo)+'-'+pad(dy);
@@ -1433,14 +1440,27 @@ function parseTWXText(text,pb){
   function fillPort(suf){
     var arr=sections[suf];if(!arr)return;
     var r=parseLines(arr);
-    if(r['inv no'])sm['invNo'+suf]=r['inv no'];
-    if(r['bl'])sm['bl'+suf]=r['bl'];
-    if(r['集裝箱號'])sm['container'+suf]=r['集裝箱號'];
-    if(r['運輸報關行'])sm['broker'+suf]=r['運輸報關行'];
-    if(r['出貨方式'])sm['shipMode'+suf]=r['出貨方式'];
-    if(r['deliv mode'])sm['delivMode'+suf]=r['deliv mode'];
-    if(r['etd']){
-      var etd=parseETD(r['etd']);
+    // INV No — multiple possible keys
+    var inv=r['inv no']||r['inv']||r['_inv']||'';
+    if(inv)sm['invNo'+suf]=inv;
+    // B/L — English or Chinese (提单号)
+    var bl=r['bl']||r['b/l']||r['提单号']||r['提單號']||'';
+    if(bl)sm['bl'+suf]=bl;
+    // Container — English or Chinese (柜号/集裝箱號)
+    var ct=r['container']||r['集裝箱號']||r['柜号']||r['櫃號']||'';
+    if(ct)sm['container'+suf]=ct;
+    // Broker
+    var br=r['broker']||r['運輸報關行']||r['运输报关行']||'';
+    if(br)sm['broker'+suf]=br;
+    // Ship mode
+    var sh=r['出貨方式']||r['ship mode']||r['shipmode']||'';
+    if(sh)sm['shipMode'+suf]=sh;
+    var dm=r['deliv mode']||r['delivmode']||'';
+    if(dm)sm['delivMode'+suf]=dm;
+    // ETD
+    var etdRaw=r['etd']||r['预计etd']||r['預計etd']||'';
+    if(etdRaw){
+      var etd=parseETD(etdRaw);
       sm['etd'+suf.toLowerCase()]=etd;
       sm['eta'+suf.toLowerCase()]=addDays(etd,3);
     }
