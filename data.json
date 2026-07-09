@@ -108,7 +108,7 @@
       "pcNotif": true,
       "inspEmail": "2026-05-28",
       "inspNotice": "2026-06-21",
-      "shipDone": false,
+      "shipDone": true,
       "inspDate": "2026-06-22",
       "adjLog": [
         {
