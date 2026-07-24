@@ -124,9 +124,37 @@
       "on": "CS302-2605070002",
       "rn": "CP018-2605070001",
       "pn": "PC813-2605070001"
+    },
+    "PUO202606726": {
+      "phase": 1,
+      "signBack": "",
+      "twx": false,
+      "issued": false,
+      "pcNotif": false,
+      "inspEmail": "",
+      "inspNotice": "",
+      "shipDone": false,
+      "inspDate": "2026-11-02",
+      "adjLog": [],
+      "on": "",
+      "rn": "",
+      "pn": ""
     }
   },
-  "orders": [],
+  "orders": [
+    {
+      "id": "mrz39umvrdv3o",
+      "po": "PUO202606726",
+      "od": "2026-07-24",
+      "cpn": "P-CARS18BK",
+      "ipn": "8ELB040001",
+      "qk": 240,
+      "qb": 300,
+      "qc": 540,
+      "fc": "2026-11-06",
+      "price": 3.4
+    }
+  ],
   "shipment": {
     "PUO202505770": {
       "exw": "2026-01-23",
