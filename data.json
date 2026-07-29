@@ -130,7 +130,7 @@
       "signBack": "2026-07-25",
       "twx": true,
       "issued": true,
-      "pcNotif": false,
+      "pcNotif": true,
       "inspEmail": "",
       "inspNotice": "",
       "shipDone": false,
