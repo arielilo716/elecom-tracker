@@ -149,6 +149,21 @@
       "on": "CS302-2607270001",
       "rn": "CP018-2607270001",
       "pn": "PC813-2607270001"
+    },
+    "PUO202607204": {
+      "phase": 1,
+      "signBack": "",
+      "twx": false,
+      "issued": false,
+      "pcNotif": false,
+      "inspEmail": "",
+      "inspNotice": "",
+      "shipDone": false,
+      "inspDate": "",
+      "adjLog": [],
+      "on": "CS302-2608100002",
+      "rn": "CP018-2608100001",
+      "pn": ""
     }
   },
   "orders": [
@@ -163,6 +178,78 @@
       "qc": 540,
       "fc": "2026-10-22",
       "price": 3.4
+    },
+    {
+      "id": "msnzc9xgczxhr",
+      "po": "PUO202607204",
+      "od": "2026-08-11",
+      "cpn": "P-DSMMWBK_化粧箱",
+      "ipn": "3112500042",
+      "qk": 0,
+      "qb": 40,
+      "qc": 40,
+      "fc": "2026-10-22",
+      "price": ""
+    },
+    {
+      "id": "msnzd0f9wwbxp",
+      "po": "PUO202607204",
+      "od": "2026-08-11",
+      "cpn": "P-DSMMWBK_透明丸シール20mm",
+      "ipn": "3172200017",
+      "qk": 0,
+      "qb": 80,
+      "qc": 80,
+      "fc": "2026-10-22",
+      "price": ""
+    },
+    {
+      "id": "msnzd8j7xnm9t",
+      "po": "PUO202607204",
+      "od": "2026-08-11",
+      "cpn": "P-DSMMWPN_化粧箱",
+      "ipn": "",
+      "qk": 0,
+      "qb": 10,
+      "qc": 10,
+      "fc": "",
+      "price": ""
+    },
+    {
+      "id": "msnzdby8hnrlf",
+      "po": "PUO202607204",
+      "od": "2026-08-11",
+      "cpn": "P-DSMMWPN_透明丸シール20mm",
+      "ipn": "3172200017",
+      "qk": 0,
+      "qb": 20,
+      "qc": 20,
+      "fc": "",
+      "price": ""
+    },
+    {
+      "id": "msnzde08otq9v",
+      "po": "PUO202607204",
+      "od": "2026-08-11",
+      "cpn": "P-DSMMWWH_化粧箱",
+      "ipn": "",
+      "qk": 0,
+      "qb": 20,
+      "qc": 20,
+      "fc": "",
+      "price": ""
+    },
+    {
+      "id": "msnzdh9vrdykb",
+      "po": "PUO202607204",
+      "od": "2026-08-11",
+      "cpn": "P-DSMMWWH_透明丸シール20mm",
+      "ipn": "3172200017",
+      "qk": 0,
+      "qb": 40,
+      "qc": 40,
+      "fc": "",
+      "price": ""
     }
   ],
   "shipment": {
