@@ -485,7 +485,7 @@ var S = {
 };
 var GH={user:'',repo:'',token:''};
 var editOId=null, editPId=null, adjPO=null, expPO=null;
-var pQueue=[], pIdx=0, lastRefs={on:'',rn:'',pn:''};
+var pQueue=[], pIdx=0, lastRefs={on:'',rn:'',pn:'',fc:'',inspDate:'',po:'',od:''};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function fU(v){if(v===''||v==null)return '—';return '$'+Number(v).toFixed(2);}
@@ -714,7 +714,15 @@ function calcT(){
 function reCalc(){var c=parseInt(document.getElementById('o_qc').value)||0,p=parseFloat(document.getElementById('o_up').value)||0;document.getElementById('o_tot').value=(c&&p)?(c*p).toFixed(2):'';}
 function openOM(pf){
   editOId=null;document.getElementById('omTitle').textContent='New Order';document.getElementById('cNote').classList.add('h');
-  clrOF();if(pf)fillOF(pf);resetFoot();document.getElementById('omModal').classList.add('op');
+  clrOF();
+  if(pf)fillOF(pf);
+  else if(lastRefs.po||lastRefs.fc){
+    // carry the shared header fields over from the line just saved
+    fillOF({po:lastRefs.po,od:lastRefs.od,fc:lastRefs.fc,inspDate:lastRefs.inspDate,
+            on:lastRefs.on,rn:lastRefs.rn,pn:lastRefs.pn});
+    document.getElementById('cNote').classList.remove('h');
+  }
+  resetFoot();document.getElementById('omModal').classList.add('op');
 }
 function editO(id){
   var o=fOrd(id);if(!o)return;
@@ -752,6 +760,7 @@ function saveO(){
   var o={id:editOId||uid(),po:d.po,od:d.od,cpn:d.cpn,ipn:d.ipn,qk:d.qk,qb:d.qb,qc:d.qc,fc:d.fc,price:d.price};
   if(editOId){for(var i=0;i<S.orders.length;i++){if(S.orders[i].id===editOId){S.orders[i]=o;break;}}}
   else S.orders.push(o);
+  capRefs();
   closeOM();renderOrders();saveGit();
 }
 function delO(id){if(!confirm('Delete?'))return;S.orders=S.orders.filter(function(o){return o.id!==id;});renderOrders();saveGit();}
@@ -770,7 +779,12 @@ function resetFoot(){
     '<button class="btn bp" onclick="saveO()">Save Order</button>';
 }
 
-function capRefs(){lastRefs={on:gv('o_on'),rn:gv('o_rn'),pn:gv('o_pn')};}
+function capRefs(){lastRefs={on:gv('o_on'),rn:gv('o_rn'),pn:gv('o_pn'),fc:gv('o_fc'),inspDate:gv('o_id'),po:gv('o_po'),od:gv('o_od')};}
+// most recent 工場回答出荷日 already recorded against this PO, if any
+function lastFc(po){
+  for(var i=S.orders.length-1;i>=0;i--){if(S.orders[i].po===po&&S.orders[i].fc)return S.orders[i].fc;}
+  return '';
+}
 function doSave(){
   var d=bldOF();
   var pd=getPO(d.po);
@@ -787,11 +801,13 @@ function openQ(q,idx){
   if(idx>0){
     if(!it.on)it.on=lastRefs.on;if(!it.rn)it.rn=lastRefs.rn;if(!it.pn)it.pn=lastRefs.pn;
     if(!it.inspDate&&q[0].inspDate)it.inspDate=q[0].inspDate;
+    if(!it.fc&&lastRefs.fc)it.fc=lastRefs.fc;
     document.getElementById('cNote').classList.remove('h');
   } else {
     var ep=getPO(it.po);
     if(!it.on&&ep.on)it.on=ep.on;if(!it.rn&&ep.rn)it.rn=ep.rn;if(!it.pn&&ep.pn)it.pn=ep.pn;
     if(!it.inspDate&&ep.inspDate)it.inspDate=ep.inspDate;
+    if(!it.fc)it.fc=lastFc(it.po);
     document.getElementById('cNote').classList.add('h');
   }
   fillOF(it);
@@ -848,7 +864,7 @@ function parsePO(e){
         if(!g.id&&cm.id!==undefined&&row[cm.id])g.id=pDate(row[cm.id]);
       }
       var keys=Object.keys(grps);if(!keys.length){alert('No line items found.');return;}
-      lastRefs={on:'',rn:'',pn:''};
+      lastRefs={on:'',rn:'',pn:'',fc:'',inspDate:'',po:'',od:''};
       var pfs=[];
       for(var ki=0;ki<keys.length;ki++){
         var g2=grps[keys[ki]],pr=fProd(g2.cpn),comb=g2.qk+g2.qb;
