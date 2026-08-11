@@ -155,7 +155,7 @@
       "signBack": "2026-08-06",
       "twx": true,
       "issued": true,
-      "pcNotif": true,
+      "pcNotif": false,
       "inspEmail": "",
       "inspNotice": "",
       "shipDone": false,
