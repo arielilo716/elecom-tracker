@@ -151,11 +151,11 @@
       "pn": "PC813-2607270001"
     },
     "PUO202607204": {
-      "phase": 2,
+      "phase": 3,
       "signBack": "2026-08-06",
       "twx": false,
       "issued": true,
-      "pcNotif": false,
+      "pcNotif": true,
       "inspEmail": "",
       "inspNotice": "",
       "shipDone": false,
