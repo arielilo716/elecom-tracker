@@ -212,7 +212,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
         <div class="fgp"><label>PO# (Base)</label><input id="o_po" placeholder="PUO202505770"></div>
         <div class="fgp"><label>Order Date</label><input id="o_od" type="date"></div>
         <div class="fgp"><label>客人料號</label><input id="o_cpn" placeholder="P-DSMMWBK" oninput="aFill()"></div>
-        <div class="fgp ro"><label>廠內料號</label><input id="o_ipn" readonly></div>
+        <div class="fgp"><label>廠內料號</label><input id="o_ipn" placeholder="auto / parts 料號" oninput="this.dataset.ed=1"></div>
         <div class="fd">Port Breakdown</div>
         <div class="fgp"><label>Kanagawa Qty</label><input id="o_qk" type="number" placeholder="0" oninput="calcT()"></div>
         <div class="fgp"><label>Kobe Qty</label><input id="o_qb" type="number" placeholder="0" oninput="calcT()"></div>
@@ -695,7 +695,15 @@ function setPF(pb,f,v){getPO(pb)[f]=v;saveGit();renderOrders();}
 function clrPF(pb,f,el){if(!el.checked){getPO(pb)[f]='';saveGit();renderOrders();}}
 function setPhase(pb,p){getPO(pb).phase=p;saveGit();renderOrders();}
 
-function aFill(){var pr=fProd(document.getElementById('o_cpn').value.trim());if(pr){document.getElementById('o_ipn').value=pr.iPN||'';calcT();}}
+function aFill(){
+  var pr=fProd(document.getElementById('o_cpn').value.trim());
+  if(pr){
+    var el=document.getElementById('o_ipn');
+    // don't clobber a manually entered 廠內料號 (parts supply uses its own 料號)
+    if(!el.dataset.ed)el.value=pr.iPN||'';
+    calcT();
+  }
+}
 function calcT(){
   var k=parseInt(document.getElementById('o_qk').value)||0,b=parseInt(document.getElementById('o_qb').value)||0,c=k+b;
   document.getElementById('o_qc').value=c||'';
@@ -723,6 +731,9 @@ function clrOF(){
 function fillOF(o){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
   s('o_po',o.po);s('o_od',o.od);s('o_cpn',o.cpn);s('o_ipn',o.ipn);
+  // if the stored 廠內料號 isn't the product master default, treat it as manually set
+  var mp=fProd(o.cpn||'');
+  if(o.ipn&&(!mp||mp.iPN!==o.ipn))document.getElementById('o_ipn').dataset.ed=1;
   s('o_qk',o.qk);s('o_qb',o.qb);s('o_qc',o.qc);s('o_fc',o.fc);s('o_id',o.inspDate);
   s('o_up',o.price?Number(o.price).toFixed(2):'');
   s('o_tot',o.price&&o.qc?(parseFloat(o.price)*parseInt(o.qc)).toFixed(2):'');
@@ -1181,8 +1192,9 @@ function openSkuModal(pb){
     var o=lines[i];
     var tot=o.price&&o.qc?'$'+(parseFloat(o.price)*(parseInt(o.qc)||0)).toFixed(2):'—';
     html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">'+
-      '<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:10px"><span class="mono">'+o.cpn+'</span> / <span class="mono">'+(o.ipn||'—')+'</span></div>'+
+      '<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:10px"><span class="mono">'+o.cpn+'</span></div>'+
       '<div class="fg">'+
+        '<div class="fgp"><label>廠內料號</label><input id="sk_ipn_'+i+'" class="mono" value="'+(o.ipn||'')+'" placeholder="parts 料號"></div>'+
         '<div class="fgp"><label>Kanagawa Qty</label><input id="sk_qk_'+i+'" type="number" value="'+(o.qk||0)+'" oninput="recalcSkuRow('+i+')"></div>'+
         '<div class="fgp"><label>Kobe Qty</label><input id="sk_qb_'+i+'" type="number" value="'+(o.qb||0)+'" oninput="recalcSkuRow('+i+')"></div>'+
         '<div class="fgp ro"><label>Combined Qty</label><input id="sk_qc_'+i+'" readonly value="'+(o.qc||0)+'"></div>'+
@@ -1211,6 +1223,7 @@ function saveSkuModal(){
     var qk=parseInt(document.getElementById('sk_qk_'+i).value)||0;
     var qb=parseInt(document.getElementById('sk_qb_'+i).value)||0;
     lines[i].qk=qk;lines[i].qb=qb;lines[i].qc=qk+qb;
+    lines[i].ipn=document.getElementById('sk_ipn_'+i).value.trim();
     lines[i].price=parseFloat(document.getElementById('sk_pr_'+i).value)||'';
   }
   closeSkuModal();renderShipped();saveGit();
