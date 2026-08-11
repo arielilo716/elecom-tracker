@@ -151,9 +151,9 @@
       "pn": "PC813-2607270001"
     },
     "PUO202607204": {
-      "phase": 2,
+      "phase": 3,
       "signBack": "2026-08-06",
-      "twx": false,
+      "twx": true,
       "issued": true,
       "pcNotif": true,
       "inspEmail": "",
