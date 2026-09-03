@@ -182,6 +182,22 @@
       "rn": "",
       "pn": "",
       "note": ""
+    },
+    "PUO202609006": {
+      "phase": 1,
+      "signBack": "",
+      "twx": false,
+      "issued": false,
+      "pcNotif": false,
+      "inspEmail": "",
+      "inspNotice": "",
+      "shipDone": false,
+      "inspDate": "2026-12-21",
+      "adjLog": [],
+      "on": "",
+      "rn": "",
+      "pn": "",
+      "note": ""
     }
   },
   "orders": [
@@ -278,6 +294,18 @@
       "qk": 60,
       "qb": 240,
       "qc": 300,
+      "fc": "2026-12-23",
+      "price": 3.4
+    },
+    {
+      "id": "mtkvak7gqt1vr",
+      "po": "PUO202609006",
+      "od": "2026-09-03",
+      "cpn": "P-CARS18BK",
+      "ipn": "8ELB040001",
+      "qk": 60,
+      "qb": 180,
+      "qc": 240,
       "fc": "2026-12-23",
       "price": 3.4
     }
