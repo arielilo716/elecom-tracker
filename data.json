@@ -213,7 +213,7 @@
       "signBack": "2026-09-07",
       "twx": false,
       "issued": true,
-      "pcNotif": false,
+      "pcNotif": true,
       "inspEmail": "",
       "inspNotice": "",
       "shipDone": false,
