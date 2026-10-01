@@ -196,7 +196,7 @@
       "phase": 2,
       "signBack": "2026-09-04",
       "twx": true,
-      "issued": false,
+      "issued": true,
       "pcNotif": false,
       "inspEmail": "",
       "inspNotice": "",
