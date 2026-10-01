@@ -207,6 +207,22 @@
       "rn": "",
       "pn": "",
       "note": ""
+    },
+    "PUO202609178": {
+      "phase": 1,
+      "signBack": "",
+      "twx": false,
+      "issued": false,
+      "pcNotif": false,
+      "inspEmail": "",
+      "inspNotice": "",
+      "shipDone": false,
+      "inspDate": "",
+      "adjLog": [],
+      "on": "CS302-2609080002",
+      "rn": "CP018-2609080001",
+      "pn": "PC813-2609080001",
+      "note": ""
     }
   },
   "orders": [
@@ -317,6 +333,30 @@
       "qc": 300,
       "fc": "2026-12-22",
       "price": 3.4
+    },
+    {
+      "id": "muosyjsgei53h",
+      "po": "PUO202609178",
+      "od": "2026-09-03",
+      "cpn": "P-CARS18BK_パッケージ（個装箱）　青緑色",
+      "ipn": "3112600007",
+      "qk": 50,
+      "qb": 0,
+      "qc": 50,
+      "fc": "",
+      "price": ""
+    },
+    {
+      "id": "muosz0f86zm8y",
+      "po": "PUO202609178",
+      "od": "2026-10-01",
+      "cpn": "P-CARS18BK_透明丸シール",
+      "ipn": "3172200017",
+      "qk": 100,
+      "qb": 0,
+      "qc": 100,
+      "fc": "",
+      "price": ""
     }
   ],
   "shipment": {
