@@ -242,7 +242,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
 <!-- ADJ MODAL -->
 <div class="mb" id="adjModal">
   <div class="mo" style="max-width:480px">
-    <div class="mh"><h3>Schedule Change Log</h3><button class="xb" onclick="closeAdj()">&#215;</button></div>
+    <div class="mh"><h3 id="adjTitle">Schedule Change Log</h3><button class="xb" onclick="closeAdj()">&#215;</button></div>
     <div class="mbd">
       <div class="fg">
         <div class="fgp"><label>Date Requested</label><input id="a_dr" type="date"></div>
@@ -486,7 +486,7 @@ var S = {
   contacts:[]
 };
 var GH={user:'',repo:'',token:''};
-var editOId=null, editPId=null, adjPO=null, expPO=null;
+var editOId=null, editPId=null, adjPO=null, editAdjId=null, expPO=null;
 var pQueue=[], pIdx=0, lastRefs={on:'',rn:'',pn:'',fc:'',inspDate:'',po:'',od:''};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
@@ -667,7 +667,14 @@ function buildDP(pb,pd,lines){
     adj='<div class="sl" style="margin-top:16px">Schedule Change Log</div>';
     for(var j=0;j<pd.adjLog.length;j++){
       var a=pd.adjLog[j];
-      adj+='<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><b>'+(a.dr||'—')+'</b> — New P/I: '+(a.nf||'—')+' | PC: '+(a.pc||'—')+' | TWX: '+(a.tw||'—')+(a.nt?' | '+a.nt:'')+'</div>';
+      if(!a.id)a.id=uid();
+      adj+='<div style="font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px">'+
+        '<span><b>'+(a.dr||'—')+'</b> — New P/I: '+(a.nf||'—')+' | PC: '+(a.pc||'—')+' | TWX: '+(a.tw||'—')+(a.nt?' | '+a.nt:'')+'</span>'+
+        '<span style="display:flex;gap:4px;flex-shrink:0">'+
+          '<button class="btn bs xs" onclick="openAdj(\''+pb+'\',\''+a.id+'\');event.stopPropagation()">Edit</button>'+
+          '<button class="btn bd xs" onclick="delAdj(\''+pb+'\',\''+a.id+'\');event.stopPropagation()">Del</button>'+
+        '</span>'+
+      '</div>';
     }
   }
 
@@ -887,21 +894,38 @@ function parsePO(e){
   e.target.value='';
 }
 
-function openAdj(pb){
-  adjPO=pb;
-  ['a_dr','a_nf','a_nt'].forEach(function(i){document.getElementById(i).value='';});
-  ['a_pc','a_cr','a_tw','a_br'].forEach(function(i){document.getElementById(i).value='';});
+function openAdj(pb,id){
+  adjPO=pb;editAdjId=id||null;
+  document.getElementById('adjTitle').textContent=id?'Edit Schedule Change':'Schedule Change Log';
+  var a={};
+  if(id){var pd=getPO(pb);for(var i=0;i<(pd.adjLog||[]).length;i++)if(pd.adjLog[i].id===id){a=pd.adjLog[i];break;}}
+  document.getElementById('a_dr').value=a.dr||'';
+  document.getElementById('a_nf').value=a.nf||'';
+  document.getElementById('a_nt').value=a.nt||'';
+  document.getElementById('a_pc').value=a.pc||'';
+  document.getElementById('a_cr').value=a.cr||'';
+  document.getElementById('a_tw').value=a.tw||'';
+  document.getElementById('a_br').value=a.br||'';
   document.getElementById('adjModal').classList.add('op');
 }
-function closeAdj(){document.getElementById('adjModal').classList.remove('op');adjPO=null;}
+function closeAdj(){document.getElementById('adjModal').classList.remove('op');adjPO=null;editAdjId=null;}
 function saveAdj(){
   var pd=getPO(adjPO);if(!pd.adjLog)pd.adjLog=[];
-  var en={dr:document.getElementById('a_dr').value,nf:document.getElementById('a_nf').value,
+  var en={id:editAdjId||uid(),dr:document.getElementById('a_dr').value,nf:document.getElementById('a_nf').value,
     pc:document.getElementById('a_pc').value,cr:document.getElementById('a_cr').value,
     tw:document.getElementById('a_tw').value,br:document.getElementById('a_br').value,
     nt:document.getElementById('a_nt').value};
   if(en.nf)for(var i=0;i<S.orders.length;i++)if(S.orders[i].po===adjPO)S.orders[i].fc=en.nf;
-  pd.adjLog.push(en);closeAdj();renderOrders();saveGit();
+  if(editAdjId){
+    for(var j=0;j<pd.adjLog.length;j++)if(pd.adjLog[j].id===editAdjId){pd.adjLog[j]=en;break;}
+  } else pd.adjLog.push(en);
+  closeAdj();renderOrders();saveGit();
+}
+function delAdj(pb,id){
+  if(!confirm('Delete this schedule change entry?'))return;
+  var pd=getPO(pb);
+  pd.adjLog=(pd.adjLog||[]).filter(function(a){return a.id!==id;});
+  renderOrders();saveGit();
 }
 
 function onFx(){S.fxRate=document.getElementById('fxRate').value;renderProds();saveGit();}
