@@ -179,7 +179,7 @@
     "PUO202609005": {
       "phase": 1,
       "signBack": "2026-09-04",
-      "twx": false,
+      "twx": true,
       "issued": false,
       "pcNotif": false,
       "inspEmail": "",
