@@ -207,8 +207,8 @@
     "PUO202609006": {
       "phase": 2,
       "signBack": "2026-09-04",
-      "twx": false,
-      "issued": true,
+      "twx": true,
+      "issued": false,
       "pcNotif": true,
       "inspEmail": "",
       "inspNotice": "",
