@@ -118,6 +118,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle
         <div class="g8">
           <button class="btn bs sm" onclick="document.getElementById('poUp').click()">Upload PO Excel</button>
           <input type="file" id="poUp" accept=".xlsx,.xls" class="h" onchange="parsePO(event)">
+          <button class="btn bs sm" onclick="exportActive()">Export to Excel</button>
           <button class="btn bp sm" onclick="openOM()">+ Manual Entry</button>
         </div>
       </div>
@@ -571,6 +572,41 @@ function getAlerts(pd){
   if((pd.phase===2||pd.phase===3)&&pd.inspDate&&!pd.inspEmail){var d=dUntil(pd.inspDate);if(d!==null&&d<=21)a.push('<span class="'+(d<=7?'fr':'fy')+'">Book inspection'+(d<=0?' OVERDUE':' in '+d+'d')+'</span>');}
   if(pd.phase===3&&pd.inspDate&&!pd.inspNotice){var d2=dUntil(pd.inspDate);if(d2!==null&&d2<=5)a.push('<span class="'+(d2<=0?'fr':'fy')+'">Notice due'+(d2<=0?' OVERDUE':' in '+d2+'d')+'</span>');}
   return a.join('<br>');
+}
+
+function stripHtml(s){return (s||'').replace(/<br\s*\/?>/gi,' / ').replace(/<[^>]+>/g,'').trim();}
+var phaseLbl={1:'Intake',2:'Production',3:'Inspection',4:'Ready'};
+function exportActive(){
+  if(!S.orders.length){alert('No active orders to export.');return;}
+  var rows=S.orders.map(function(o){
+    var pd=getPO(o.po);
+    var tot=(o.price&&o.qc)?(parseFloat(o.price)*parseInt(o.qc)):'';
+    return {
+      'PO# (Base)':o.po,
+      '客人料號':o.cpn,
+      '廠內料號':o.ipn||'',
+      'Kanagawa Qty':o.qk||0,
+      'Kobe Qty':o.qb||0,
+      'Combined Qty':o.qc||0,
+      '工場回答出荷日 P/I':o.fc||'',
+      '驗貨日期 Inspection':pd.inspDate||'',
+      'Unit Price USD':o.price||'',
+      'Line Total USD':tot,
+      'Phase':phaseLbl[pd.phase]||'Intake',
+      'Alerts':stripHtml(getAlerts(pd)),
+      '訂單單號':pd.on||'',
+      '請購單號':pd.rn||'',
+      '採購單號':pd.pn||'',
+      'Note':pd.note||''
+    };
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:16},{wch:14},{wch:14},{wch:10},{wch:8},{wch:12},{wch:14},{wch:16},{wch:12},{wch:12},{wch:10},{wch:22},{wch:14},{wch:14},{wch:14},{wch:24}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Active Orders');
+  var d=new Date(),pad=function(n){return String(n).padStart(2,'0');};
+  var fname='ActiveOrders_'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.xlsx';
+  XLSX.writeFile(wb,fname);
 }
 
 function renderOrders(){
